@@ -14,10 +14,10 @@ from fastapi.responses import JSONResponse
 # Import routers
 from ad_router import router as agent_description_router
 from api_router import router as api_router
-from jsonrpc_router import router as jsonrpc_router
 
 # Import authentication middleware
 from auth_middleware import auth_middleware
+from jsonrpc_router import router as jsonrpc_router
 
 # Configure logging
 logging.basicConfig(
@@ -158,11 +158,13 @@ async def internal_error_handler(request: Request, exc):
 if __name__ == "__main__":
     import uvicorn
 
+    from config import HOST, LOG_LEVEL, PORT, RELOAD
+
     # Start the server
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
+        host=HOST,
+        port=PORT,
+        reload=RELOAD,
+        log_level=LOG_LEVEL.lower()
     )

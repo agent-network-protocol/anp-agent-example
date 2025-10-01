@@ -86,10 +86,10 @@ def get_agent_did(agent_name: str) -> str:
 def get_agent_url(path: str) -> str:
     """
     Generate full URL for agent resources.
-    
+
     Args:
         path: Resource path
-        
+
     Returns:
         Full URL string
     """

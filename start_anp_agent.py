@@ -20,20 +20,21 @@ os.chdir(project_root)
 if __name__ == "__main__":
     import uvicorn
 
+    from config import HOST, LOG_LEVEL, PORT, RELOAD
 
     print("🚀 Starting ANP Agent Example Server")
     print("=" * 40)
     print(f"📁 Project root: {project_root}")
     print(f"📁 Source path: {src_path}")
-    print("🌐 Server will be available at: http://localhost:8000")
-    print("📚 API docs will be available at: http://localhost:8000/docs")
+    print(f"🌐 Server will be available at: http://{HOST}:{PORT}")
+    print(f"📚 API docs will be available at: http://localhost:{PORT}/docs")
     print()
 
     # Start the server
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
+        host=HOST,
+        port=PORT,
+        reload=RELOAD,
+        log_level=LOG_LEVEL.lower()
     )
