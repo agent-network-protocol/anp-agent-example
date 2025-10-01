@@ -153,7 +153,7 @@ def _build_agent_description() -> dict[str, Any]:
                     "servers": [
                         {
                             "name": "Test Server",
-                            "url": get_agent_url("/api/test/jsonrpc"),
+                            "url": get_agent_url("/agents/test/jsonrpc"),
                             "description": "Demo JSON-RPC endpoint exposed by the agent.",
                         }
                     ],

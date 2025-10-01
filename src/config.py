@@ -99,14 +99,19 @@ def get_agent_url(path: str) -> str:
 def get_api_file_path(filename: str) -> str:
     """
     Get full path to API definition file.
-    
+
     Args:
         filename: API file name
-        
+
     Returns:
         Full file path
     """
-    return os.path.join(API_FILES_DIRECTORY, filename)
+    # Check if we're running from src directory or project root
+    if os.path.exists(API_FILES_DIRECTORY):
+        return os.path.join(API_FILES_DIRECTORY, filename)
+    else:
+        # We're running from project root, look in src/api
+        return os.path.join("src", API_FILES_DIRECTORY, filename)
 
 # Validation functions
 def validate_config() -> list[str]:

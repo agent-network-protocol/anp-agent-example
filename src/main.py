@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 # Import routers
 from ad_router import router as agent_description_router
 from api_router import router as api_router
+from jsonrpc_router import router as jsonrpc_router
 
 # Import authentication middleware
 from auth_middleware import auth_middleware
@@ -50,6 +51,7 @@ app.middleware("http")(auth_middleware)
 # Include routers
 app.include_router(agent_description_router, tags=["Agent Description"])
 app.include_router(api_router, tags=["API Resources"])
+app.include_router(jsonrpc_router, tags=["JSON-RPC API"])
 
 
 

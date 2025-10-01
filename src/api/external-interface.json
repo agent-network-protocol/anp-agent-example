@@ -23,296 +23,79 @@
   "servers": [
     {
       "name": "Production Server",
-      "url": "https://AGENT_DESCRIPTION_JSON_DOMAIN/api/test/jsonrpc",
+      "url": "https://AGENT_DESCRIPTION_JSON_DOMAIN/agents/test/jsonrpc",
       "description": "测试智能体外部API生产服务器"
     }
   ],
   "methods": [
     {
-      "name": "calculateSum",
-      "summary": "计算数值总和",
-      "description": "计算提供的数字数组的总和，支持整数和浮点数",
+      "name": "add",
+      "summary": "加法运算",
+      "description": "计算两个数字的和",
       "params": [
         {
-          "name": "numbers",
-          "description": "要计算总和的数字数组",
+          "name": "a",
+          "description": "第一个数字",
           "required": true,
           "schema": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            },
-            "minItems": 1,
-            "maxItems": 100,
-            "description": "数字数组，包含要相加的所有数值"
+            "type": "number",
+            "description": "第一个加数"
+          }
+        },
+        {
+          "name": "b",
+          "description": "第二个数字",
+          "required": true,
+          "schema": {
+            "type": "number",
+            "description": "第二个加数"
           }
         }
       ],
       "result": {
-        "name": "sumResult",
-        "description": "计算结果",
+        "name": "addResult",
+        "description": "加法运算结果",
         "schema": {
           "type": "object",
           "properties": {
-            "sum": {
+            "result": {
               "type": "number",
-              "description": "计算得出的总和"
-            },
-            "count": {
-              "type": "integer",
-              "description": "参与计算的数字个数"
-            },
-            "average": {
-              "type": "number",
-              "description": "平均值"
+              "description": "计算结果"
             }
           },
-          "required": [
-            "sum",
-            "count"
-          ]
-        }
-      },
-      "errors": [
-        {
-          "code": -32602,
-          "message": "Invalid params",
-          "data": {
-            "type": "object",
-            "properties": {
-              "details": {
-                "type": "string",
-                "example": "数组为空或包含无效数值"
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "validateData",
-      "summary": "数据验证",
-      "description": "验证输入数据的格式和有效性，支持多种数据类型验证",
-      "params": [
-        {
-          "name": "data",
-          "description": "要验证的数据",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "email": {
-                "type": "string",
-                "format": "email",
-                "description": "电子邮件地址"
-              },
-              "phone": {
-                "type": "string",
-                "pattern": "^\\+?[1-9]\\d{1,14}$",
-                "description": "电话号码"
-              },
-              "age": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 150,
-                "description": "年龄"
-              },
-              "name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100,
-                "description": "姓名"
-              }
-            },
-            "additionalProperties": true
-          }
-        }
-      ],
-      "result": {
-        "name": "validationResult",
-        "description": "验证结果",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "isValid": {
-              "type": "boolean",
-              "description": "验证是否通过"
-            },
-            "issues": {
-              "type": "array",
-              "description": "验证失败的具体问题",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "field": {
-                    "type": "string",
-                    "description": "出现问题的字段"
-                  },
-                  "message": {
-                    "type": "string",
-                    "description": "问题描述"
-                  }
-                }
-              }
-            },
-            "timestamp": {
-              "type": "string",
-              "format": "date-time",
-              "description": "验证时间戳"
-            }
-          }
+          "required": ["result"]
         }
       }
     },
     {
-      "name": "generateReport",
-      "summary": "生成分析报告",
-      "description": "根据输入的数据生成结构化的分析报告",
+      "name": "greet",
+      "summary": "问候",
+      "description": "生成个性化问候语",
       "params": [
         {
-          "name": "reportRequest",
-          "description": "报告生成请求",
+          "name": "name",
+          "description": "姓名",
           "required": true,
           "schema": {
-            "type": "object",
-            "properties": {
-              "title": {
-                "type": "string",
-                "minLength": 3,
-                "maxLength": 120,
-                "description": "报告标题"
-              },
-              "content": {
-                "type": "string",
-                "description": "报告的主要内容"
-              },
-              "metadata": {
-                "type": "object",
-                "properties": {
-                  "author": {
-                    "type": "string",
-                    "description": "报告作者"
-                  },
-                  "audience": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "目标读者"
-                  },
-                  "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "报告标签"
-                  },
-                  "published": {
-                    "type": "boolean",
-                    "description": "是否公开发布"
-                  },
-                  "publishedAt": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "发布时间"
-                  }
-                }
-              },
-              "attachments": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string",
-                      "description": "附件名称"
-                    },
-                    "type": {
-                      "type": "string",
-                      "description": "附件类型"
-                    },
-                    "content": {
-                      "type": "string",
-                      "description": "附件内容（Base64编码）"
-                    }
-                  }
-                }
-              }
-            },
-            "required": [
-              "title",
-              "content"
-            ]
-          }
-        },
-        {
-          "name": "format",
-          "description": "输出格式",
-          "required": false,
-          "schema": {
             "type": "string",
-            "enum": [
-              "json",
-              "html",
-              "pdf",
-              "markdown"
-            ],
-            "default": "json",
-            "description": "报告输出格式"
+            "description": "要问候的人的姓名"
           }
         }
       ],
       "result": {
-        "name": "reportResult",
-        "description": "生成的报告",
+        "name": "greetResult",
+        "description": "问候结果",
         "schema": {
           "type": "object",
           "properties": {
-            "reportId": {
+            "message": {
               "type": "string",
-              "description": "报告唯一标识符"
-            },
-            "content": {
-              "type": "string",
-              "description": "报告内容（格式化后）"
-            },
-            "format": {
-              "type": "string",
-              "description": "实际输出格式"
-            },
-            "generatedAt": {
-              "type": "string",
-              "format": "date-time",
-              "description": "报告生成时间"
-            },
-            "size": {
-              "type": "integer",
-              "description": "报告大小（字节）"
+              "description": "问候消息"
             }
           },
-          "required": [
-            "reportId",
-            "content",
-            "format",
-            "generatedAt"
-          ]
+          "required": ["message"]
         }
-      },
-      "errors": [
-        {
-          "code": -32603,
-          "message": "Internal error",
-          "data": {
-            "type": "object",
-            "properties": {
-              "details": {
-                "type": "string",
-                "example": "报告生成失败，请检查输入数据"
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "components": {

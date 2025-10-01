@@ -37,6 +37,9 @@ EXEMPT_PATHS = [
     "/",  # Allow access to root endpoint
     "/v1/chat",
     "/static/",  # Allow access to all paths under /static/
+    "/agents/test/jsonrpc",  # Allow access to unified JSON-RPC interface for testing
+    "/agents/test/ad.json",  # Allow access to agent description for testing
+    "/agents/test/api/",  # Allow access to API files for testing
 ]
 
 
