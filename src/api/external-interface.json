@@ -1,0 +1,368 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "Test Agent External API",
+    "version": "1.0.0",
+    "description": "外部OpenRPC接口，提供测试智能体的基础服务和数据操作功能",
+    "x-anp-protocol-type": "ANP",
+    "x-anp-protocol-version": "1.0.0",
+    "contact": {
+      "name": "Test Agent Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "security": [
+    {
+      "didwba": []
+    }
+  ],
+  "servers": [
+    {
+      "name": "Production Server",
+      "url": "https://agent-connect.ai/api/test/jsonrpc",
+      "description": "测试智能体外部API生产服务器"
+    },
+    {
+      "name": "Development Server",
+      "url": "https://dev.agent-connect.ai/api/test/jsonrpc",
+      "description": "测试智能体外部API开发服务器"
+    }
+  ],
+  "methods": [
+    {
+      "name": "calculateSum",
+      "summary": "计算数值总和",
+      "description": "计算提供的数字数组的总和，支持整数和浮点数",
+      "params": [
+        {
+          "name": "numbers",
+          "description": "要计算总和的数字数组",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "数字数组，包含要相加的所有数值"
+          }
+        }
+      ],
+      "result": {
+        "name": "sumResult",
+        "description": "计算结果",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "sum": {
+              "type": "number",
+              "description": "计算得出的总和"
+            },
+            "count": {
+              "type": "integer",
+              "description": "参与计算的数字个数"
+            },
+            "average": {
+              "type": "number",
+              "description": "平均值"
+            }
+          },
+          "required": ["sum", "count"]
+        }
+      },
+      "errors": [
+        {
+          "code": -32602,
+          "message": "Invalid params",
+          "data": {
+            "type": "object",
+            "properties": {
+              "details": {
+                "type": "string",
+                "example": "数组为空或包含无效数值"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "validateData",
+      "summary": "数据验证",
+      "description": "验证输入数据的格式和有效性，支持多种数据类型验证",
+      "params": [
+        {
+          "name": "data",
+          "description": "要验证的数据",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "电子邮件地址"
+              },
+              "phone": {
+                "type": "string",
+                "pattern": "^\\+?[1-9]\\d{1,14}$",
+                "description": "电话号码"
+              },
+              "age": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 150,
+                "description": "年龄"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "姓名"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        {
+          "name": "validationRules",
+          "description": "验证规则配置",
+          "required": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "strict": {
+                "type": "boolean",
+                "default": false,
+                "description": "是否启用严格验证模式"
+              },
+              "requiredFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "必填字段列表"
+              }
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "validationResult",
+        "description": "验证结果",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "isValid": {
+              "type": "boolean",
+              "description": "数据是否有效"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "出错的字段名"
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "错误信息"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "错误代码"
+                  }
+                }
+              },
+              "description": "验证错误列表"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "警告信息列表"
+            }
+          },
+          "required": ["isValid"]
+        }
+      }
+    },
+    {
+      "name": "generateReport",
+      "summary": "生成报告",
+      "description": "根据提供的数据和模板生成格式化报告",
+      "params": [
+        {
+          "name": "reportData",
+          "description": "报告数据",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "报告标题"
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "section": {
+                      "type": "string",
+                      "description": "章节名称"
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "章节数据"
+                    }
+                  }
+                },
+                "description": "报告内容"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "author": {
+                    "type": "string",
+                    "description": "作者"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "报告日期"
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "报告版本"
+                  }
+                },
+                "description": "报告元数据"
+              }
+            },
+            "required": ["title", "content"]
+          }
+        },
+        {
+          "name": "format",
+          "description": "输出格式",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": ["json", "html", "pdf", "markdown"],
+            "default": "json",
+            "description": "报告输出格式"
+          }
+        }
+      ],
+      "result": {
+        "name": "reportResult",
+        "description": "生成的报告",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "reportId": {
+              "type": "string",
+              "description": "报告唯一标识符"
+            },
+            "content": {
+              "type": "string",
+              "description": "报告内容（格式化后）"
+            },
+            "format": {
+              "type": "string",
+              "description": "实际输出格式"
+            },
+            "generatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "报告生成时间"
+            },
+            "size": {
+              "type": "integer",
+              "description": "报告大小（字节）"
+            }
+          },
+          "required": ["reportId", "content", "format", "generatedAt"]
+        }
+      },
+      "errors": [
+        {
+          "code": -32603,
+          "message": "Internal error",
+          "data": {
+            "type": "object",
+            "properties": {
+              "details": {
+                "type": "string",
+                "example": "报告生成失败，请检查输入数据"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "didwba": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "DID-WBA",
+        "description": "DID-WBA认证方案，用于智能体间的安全通信"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "description": "错误代码"
+              },
+              "message": {
+                "type": "string",
+                "description": "错误信息"
+              },
+              "data": {
+                "type": "object",
+                "description": "错误详细信息"
+              }
+            },
+            "required": ["code", "message"]
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "object",
+            "description": "成功响应结果"
+          },
+          "id": {
+            "type": ["string", "number", "null"],
+            "description": "请求标识符"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "测试智能体API详细文档",
+    "url": "https://docs.agent-connect.ai/test-agent"
+  }
+}
+
+
