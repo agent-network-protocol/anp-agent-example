@@ -174,8 +174,9 @@ ehthumbs.db
 *.key
 *.crt
 *.csr
-private_key.pem
-public_key.pem
+!docs/jwt_key/RS256-private.pem
+!docs/jwt_key/RS256-public.pem
+!docs/did_public/public-private-key.pem
 
 # Local configuration
 config.local.py
