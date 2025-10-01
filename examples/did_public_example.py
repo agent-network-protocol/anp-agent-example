@@ -109,7 +109,7 @@ class ANPAgentClient:
             # If it's an inline interface, show some details
             if 'content' in interface:
                 content = interface['content']
-                if isinstance(content, dict):
+                if isinstance(content, Dict):
                     if 'methods' in content:
                         methods = content['methods']
                         print(f"   Methods: {len(methods)} available")

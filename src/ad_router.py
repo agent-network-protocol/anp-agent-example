@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
@@ -31,7 +31,7 @@ _EXTERNAL_INTERFACE_PATH = f"{_AGENT_BASE_PATH}/api/external-interface.json"
 _INFO_PATH_TEMPLATE = f"{_AGENT_BASE_PATH}/info/{{resource_id}}.json"
 _PRODUCT_PATH_TEMPLATE = f"{_AGENT_BASE_PATH}/products/{{resource_id}}.json"
 
-_INFORMATION_DATA: Dict[str, Dict[str, Any]] = {
+_INFORMATION_DATA: dict[str, dict[str, Any]] = {
     "basic-info": {
         "type": "Information",
         "title": "Test Agent Overview",
@@ -49,7 +49,7 @@ _INFORMATION_DATA: Dict[str, Dict[str, Any]] = {
     }
 }
 
-_PRODUCT_DATA: Dict[str, Dict[str, Any]] = {
+_PRODUCT_DATA: dict[str, dict[str, Any]] = {
     "test-product": {
         "type": "Product",
         "name": "Synthetic Insights Bundle",
@@ -78,7 +78,7 @@ def _current_timestamp() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _build_agent_description() -> Dict[str, Any]:
+def _build_agent_description() -> dict[str, Any]:
     """Assemble the ANP AgentDescription payload with embedded test resources."""
     external_interface_url = f"https://{AGENT_DESCRIPTION_JSON_DOMAIN}{_EXTERNAL_INTERFACE_PATH}"
 

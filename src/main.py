@@ -17,7 +17,6 @@ from api_router import router as api_router
 
 # Import authentication middleware
 from auth_middleware import auth_middleware
-from yaml_router import router as yaml_router
 
 # Configure logging
 logging.basicConfig(
@@ -51,7 +50,7 @@ app.middleware("http")(auth_middleware)
 # Include routers
 app.include_router(agent_description_router, tags=["Agent Description"])
 app.include_router(api_router, tags=["API Resources"])
-app.include_router(yaml_router, tags=["YAML Resources"])
+
 
 
 @app.get("/", response_class=JSONResponse)
