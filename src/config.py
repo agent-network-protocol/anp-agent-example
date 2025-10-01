@@ -6,6 +6,22 @@ the application, including domain settings, paths, and service parameters.
 """
 
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+# Try to find .env file in project root
+_current_file = Path(__file__).resolve()
+_project_root = _current_file.parent.parent
+_env_file = _project_root / ".env"
+
+if _env_file.exists():
+    load_dotenv(_env_file)
+    print(f"✅ Loaded environment variables from: {_env_file}")
+else:
+    print(f"ℹ️  No .env file found at: {_env_file}")
+    print("ℹ️  Using default configuration values")
 
 # Agent service domain configuration
 # This should be configured based on your deployment environment
@@ -30,7 +46,7 @@ AUTH_NONCE_EXPIRY_MINUTES = int(os.getenv("AUTH_NONCE_EXPIRY_MINUTES", "5"))
 AUTH_TIMESTAMP_EXPIRY_MINUTES = int(os.getenv("AUTH_TIMESTAMP_EXPIRY_MINUTES", "5"))
 
 # Key file paths - default to docs/jwt_key directory (relative to project root)
-_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# _project_root already defined above when loading .env file
 JWT_PRIVATE_KEY_PATH = os.getenv("JWT_PRIVATE_KEY_PATH", os.path.join(_project_root, "docs/jwt_key/RS256-private.pem"))
 JWT_PUBLIC_KEY_PATH = os.getenv("JWT_PUBLIC_KEY_PATH", os.path.join(_project_root, "docs/jwt_key/RS256-public.pem"))
 

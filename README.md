@@ -31,9 +31,13 @@ uv sync
 
 ### Running the Service
 
-1. Set required environment variables:
+1. Configure environment variables (optional):
 ```bash
-export AGENT_DESCRIPTION_JSON_DOMAIN=agent-connect.ai
+# Create .env file from template
+cp env.example .env
+
+# Edit .env file with your configuration
+# The .env file will be automatically loaded
 ```
 
 2. Start the development server:

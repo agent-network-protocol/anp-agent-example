@@ -23,13 +23,8 @@
   "servers": [
     {
       "name": "Production Server",
-      "url": "https://agent-connect.ai/api/test/jsonrpc",
+      "url": "https://AGENT_DESCRIPTION_JSON_DOMAIN/api/test/jsonrpc",
       "description": "测试智能体外部API生产服务器"
-    },
-    {
-      "name": "Development Server",
-      "url": "https://dev.agent-connect.ai/api/test/jsonrpc",
-      "description": "测试智能体外部API开发服务器"
     }
   ],
   "methods": [
@@ -72,7 +67,10 @@
               "description": "平均值"
             }
           },
-          "required": ["sum", "count"]
+          "required": [
+            "sum",
+            "count"
+          ]
         }
       },
       "errors": [
@@ -128,28 +126,6 @@
             },
             "additionalProperties": true
           }
-        },
-        {
-          "name": "validationRules",
-          "description": "验证规则配置",
-          "required": false,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "strict": {
-                "type": "boolean",
-                "default": false,
-                "description": "是否启用严格验证模式"
-              },
-              "requiredFields": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "必填字段列表"
-              }
-            }
-          }
         }
       ],
       "result": {
@@ -160,95 +136,113 @@
           "properties": {
             "isValid": {
               "type": "boolean",
-              "description": "数据是否有效"
+              "description": "验证是否通过"
             },
-            "errors": {
+            "issues": {
               "type": "array",
+              "description": "验证失败的具体问题",
               "items": {
                 "type": "object",
                 "properties": {
                   "field": {
                     "type": "string",
-                    "description": "出错的字段名"
+                    "description": "出现问题的字段"
                   },
                   "message": {
                     "type": "string",
-                    "description": "错误信息"
-                  },
-                  "code": {
-                    "type": "string",
-                    "description": "错误代码"
+                    "description": "问题描述"
                   }
                 }
-              },
-              "description": "验证错误列表"
+              }
             },
-            "warnings": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "警告信息列表"
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "description": "验证时间戳"
             }
-          },
-          "required": ["isValid"]
+          }
         }
       }
     },
     {
       "name": "generateReport",
-      "summary": "生成报告",
-      "description": "根据提供的数据和模板生成格式化报告",
+      "summary": "生成分析报告",
+      "description": "根据输入的数据生成结构化的分析报告",
       "params": [
         {
-          "name": "reportData",
-          "description": "报告数据",
+          "name": "reportRequest",
+          "description": "报告生成请求",
           "required": true,
           "schema": {
             "type": "object",
             "properties": {
               "title": {
                 "type": "string",
+                "minLength": 3,
+                "maxLength": 120,
                 "description": "报告标题"
               },
               "content": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "section": {
-                      "type": "string",
-                      "description": "章节名称"
-                    },
-                    "data": {
-                      "type": "object",
-                      "description": "章节数据"
-                    }
-                  }
-                },
-                "description": "报告内容"
+                "type": "string",
+                "description": "报告的主要内容"
               },
               "metadata": {
                 "type": "object",
                 "properties": {
                   "author": {
                     "type": "string",
-                    "description": "作者"
+                    "description": "报告作者"
                   },
-                  "date": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "报告日期"
+                  "audience": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "目标读者"
                   },
-                  "version": {
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "报告标签"
+                  },
+                  "published": {
+                    "type": "boolean",
+                    "description": "是否公开发布"
+                  },
+                  "publishedAt": {
                     "type": "string",
-                    "description": "报告版本"
+                    "format": "date-time",
+                    "description": "发布时间"
                   }
-                },
-                "description": "报告元数据"
+                }
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "附件名称"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "附件类型"
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "附件内容（Base64编码）"
+                    }
+                  }
+                }
               }
             },
-            "required": ["title", "content"]
+            "required": [
+              "title",
+              "content"
+            ]
           }
         },
         {
@@ -257,7 +251,12 @@
           "required": false,
           "schema": {
             "type": "string",
-            "enum": ["json", "html", "pdf", "markdown"],
+            "enum": [
+              "json",
+              "html",
+              "pdf",
+              "markdown"
+            ],
             "default": "json",
             "description": "报告输出格式"
           }
@@ -291,7 +290,12 @@
               "description": "报告大小（字节）"
             }
           },
-          "required": ["reportId", "content", "format", "generatedAt"]
+          "required": [
+            "reportId",
+            "content",
+            "format",
+            "generatedAt"
+          ]
         }
       },
       "errors": [
@@ -340,7 +344,10 @@
                 "description": "错误详细信息"
               }
             },
-            "required": ["code", "message"]
+            "required": [
+              "code",
+              "message"
+            ]
           }
         }
       },
@@ -352,7 +359,11 @@
             "description": "成功响应结果"
           },
           "id": {
-            "type": ["string", "number", "null"],
+            "type": [
+              "string",
+              "number",
+              "null"
+            ],
             "description": "请求标识符"
           }
         }
@@ -364,5 +375,3 @@
     "url": "https://docs.agent-connect.ai/test-agent"
   }
 }
-
-

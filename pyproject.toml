@@ -12,6 +12,7 @@ dependencies = [
     "python-multipart>=0.0.6",
     "pyyaml>=6.0",
     "agent-connect==0.3.7",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]

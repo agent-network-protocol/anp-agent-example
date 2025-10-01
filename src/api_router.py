@@ -7,15 +7,37 @@ used by the test agent.
 import json
 import logging
 import os
+from typing import Any, Dict
+from urllib.parse import urlparse, urlunparse
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
-from config import get_api_file_path
+from config import AGENT_DESCRIPTION_JSON_DOMAIN, get_api_file_path
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agents")
+
+
+def _apply_domain_override(payload: Dict[str, Any]) -> None:
+    """Update OpenRPC server URLs to reflect the configured agent domain."""
+    domain = AGENT_DESCRIPTION_JSON_DOMAIN
+    servers = payload.get("servers", [])
+    if not isinstance(servers, list):
+        return
+
+    for server in servers:
+        url = server.get("url")
+        if not isinstance(url, str) or not url:
+            continue
+
+        parsed = urlparse(url if "://" in url else f"https://{url}")
+        scheme = parsed.scheme or "https"
+        path = parsed.path or "/"
+
+        server["url"] = urlunparse((scheme, domain, path, "", "", ""))
+
 
 @router.get("/test/api/{json_file}")
 async def get_json_file(json_file: str):
@@ -43,7 +65,9 @@ async def get_json_file(json_file: str):
 
         # 读取并返回JSON文件内容
         with open(api_file_path, encoding='utf-8') as file:
-            json_content = json.load(file)
+            json_content: Dict[str, Any] = json.load(file)
+
+        _apply_domain_override(json_content)
 
         logging.info(f"Successfully served API file: {json_file}")
         return JSONResponse(content=json_content)
