@@ -173,6 +173,8 @@ async def main():
         agent_desc = await client.get_agent_description()
         print("✅ Agent description retrieved successfully!")
 
+        print("agent_desc: ", agent_desc)
+
         print("\n📊 Agent Information:")
         print(f"   Name: {agent_desc.get('name')}")
         print(f"   DID: {agent_desc.get('did')}")

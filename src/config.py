@@ -83,7 +83,6 @@ def get_agent_did(agent_name: str) -> str:
         Formatted DID string
     """
     return f"{AGENT_DID_PREFIX}:{agent_name}"
-
 def get_agent_url(path: str) -> str:
     """
     Generate full URL for agent resources.
@@ -94,7 +93,37 @@ def get_agent_url(path: str) -> str:
     Returns:
         Full URL string
     """
-    return f"https://{AGENT_DESCRIPTION_JSON_DOMAIN}{path}"
+    import ipaddress
+
+    # Use http for localhost or IP addresses, https for domain names
+    domain = AGENT_DESCRIPTION_JSON_DOMAIN
+
+    # Extract host part if port is present
+    host = domain
+    if ':' in domain:
+        # Handle IPv6 with port: [::1]:8000 or IPv4 with port: 127.0.0.1:8000
+        if domain.startswith('['):
+            # IPv6 with port format: [::1]:8000
+            bracket_end = domain.find(']')
+            if bracket_end != -1:
+                host = domain[1:bracket_end]
+        else:
+            # IPv4 with port or hostname with port
+            host = domain.rsplit(':', 1)[0]
+
+    # Check if it's localhost
+    if host in ("localhost", "127.0.0.1", "::1"):
+        protocol = "http"
+    else:
+        # Try to parse as IP address (IPv4 or IPv6)
+        try:
+            ipaddress.ip_address(host)
+            protocol = "http"
+        except ValueError:
+            # Not an IP address, treat as domain name
+            protocol = "https"
+
+    return f"{protocol}://{domain}{path}"
 
 def get_api_file_path(filename: str) -> str:
     """
