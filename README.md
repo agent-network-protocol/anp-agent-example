@@ -1,5 +1,7 @@
 # ANP Agent Example
 
+[中文版本](README.cn.md) | English
+
 This is an example implementation of an ANP (Agent Network Protocol) compliant agent service built with FastAPI. It demonstrates how to build agents that support the ANP protocol, including agent description documents, DID-WBA authentication, and standardized API interfaces.
 
 ## Features
@@ -51,6 +53,8 @@ uvicorn src.main:app --reload
 ```
 
 The service will be available at `http://localhost:8000`.
+
+Additionally, this service has been deployed and can be tested by accessing https://agent-connect.ai/agents/test/ad.json
 
 ## API Endpoints
 
