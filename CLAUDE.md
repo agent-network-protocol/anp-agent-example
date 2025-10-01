@@ -44,9 +44,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### API端点结构
 - `/` - 根端点，提供服务信息
 - `/health` - 健康检查端点
-- `/agents/travel/test/ad.json` - 智能体描述（需要身份验证）
-- `/agents/travel/test/api/{json_file}` - JSON API定义文件
-- `/agents/travel/test/api_files/{yaml_file}` - YAML API定义文件
+- `/agents/test/ad.json` - 智能体描述（需要身份验证）
+- `/agents/test/api/{json_file}` - JSON API定义文件
+- `/agents/test/api_files/{yaml_file}` - YAML API定义文件
 
 ### 身份验证
 - 使用DID-WBA身份验证方案（基于agent-connect库）

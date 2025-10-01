@@ -7,9 +7,7 @@ and retrieve agent metadata using DID-WBA authentication.
 """
 
 import asyncio
-import json
 import sys
-from pathlib import Path
 from typing import Any, Dict
 
 import httpx
@@ -18,7 +16,7 @@ from agent_connect.authentication import DIDWbaAuthHeader
 
 class ANPAgentClient:
     """Client for connecting to ANP-compliant agents."""
-    
+
     def __init__(self, base_url: str = "http://localhost:8000"):
         """Initialize the ANP agent client.
         
@@ -28,15 +26,15 @@ class ANPAgentClient:
         self.base_url = base_url.rstrip('/')
         self.client = httpx.AsyncClient()
         self.authenticator = None
-        
+
     async def __aenter__(self):
         """Async context manager entry."""
         return self
-        
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         await self.client.aclose()
-    
+
     def setup_authentication(self, did_document_path: str, private_key_path: str):
         """Setup DID-WBA authentication.
         
@@ -48,8 +46,8 @@ class ANPAgentClient:
             did_document_path=did_document_path,
             private_key_path=private_key_path,
         )
-    
-    async def get_agent_description(self, agent_path: str = "/agents/travel/test/ad.json") -> Dict[str, Any]:
+
+    async def get_agent_description(self, agent_path: str = "/agents/test/ad.json") -> Dict[str, Any]:
         """Get agent description from the ANP agent.
         
         Args:
@@ -62,28 +60,28 @@ class ANPAgentClient:
             httpx.HTTPStatusError: If the request fails
         """
         url = f"{self.base_url}{agent_path}"
-        
+
         # Prepare headers
         headers = {"Content-Type": "application/json"}
-        
+
         # Add authentication if configured
         if self.authenticator:
             auth_headers = self.authenticator.get_auth_header(url, force_new=True)
             headers.update(auth_headers)
-        
+
         # Make the request
         response = await self.client.get(url, headers=headers)
-        
+
         # Handle authentication challenges
         if response.status_code == 401 and self.authenticator:
             print("Authentication required, retrying with DID-WBA...")
             auth_headers = self.authenticator.get_auth_header(url, force_new=True)
             headers.update(auth_headers)
             response = await self.client.get(url, headers=headers)
-        
+
         response.raise_for_status()
         return response.json()
-    
+
     async def get_service_info(self) -> Dict[str, Any]:
         """Get basic service information (no auth required).
         
@@ -94,7 +92,7 @@ class ANPAgentClient:
         response = await self.client.get(url)
         response.raise_for_status()
         return response.json()
-    
+
     async def get_health_status(self) -> Dict[str, Any]:
         """Get service health status (no auth required).
         
@@ -111,7 +109,7 @@ async def main():
     """Main example function."""
     print("🤖 ANP Agent Client Example")
     print("=" * 50)
-    
+
     # Initialize client
     async with ANPAgentClient() as client:
         try:
@@ -122,12 +120,12 @@ async def main():
             print(f"Version: {service_info.get('version')}")
             print(f"Protocol: {service_info.get('protocol')} v{service_info.get('protocol_version')}")
             print(f"Status: {service_info.get('status')}")
-            
+
             # 2. Get health status (no auth required)
             print("\n🏥 Getting health status...")
             health = await client.get_health_status()
             print(f"Health: {health.get('status')}")
-            
+
             # 3. Try to get agent description without authentication
             print("\n🔓 Trying to get agent description without authentication...")
             try:
@@ -144,36 +142,36 @@ async def main():
                     print("   - Call client.setup_authentication(did_doc_path, key_path)")
                 else:
                     print(f"❌ Unexpected error: {e}")
-            
+
             # 4. Example with mock authentication (for demonstration)
             print("\n🔐 Example with Bearer token (mock authentication)...")
             try:
                 headers = {"Authorization": "Bearer mock-token-for-demo"}
-                url = f"{client.base_url}/agents/travel/test/ad.json"
+                url = f"{client.base_url}/agents/test/ad.json"
                 response = await client.client.get(url, headers=headers)
-                
+
                 if response.status_code == 200:
                     agent_desc = response.json()
                     print("✅ Success! Agent description retrieved with mock token.")
                     print(f"Agent Name: {agent_desc.get('name')}")
                     print(f"Agent DID: {agent_desc.get('did')}")
                     print(f"Interfaces: {len(agent_desc.get('interfaces', []))} available")
-                    
+
                     # Show interface types
                     for i, interface in enumerate(agent_desc.get('interfaces', []), 1):
                         print(f"  {i}. {interface.get('type')} - {interface.get('protocol')}")
-                        
+
                 else:
                     print(f"❌ Failed with status: {response.status_code}")
-                    
+
             except Exception as e:
                 print(f"❌ Error: {e}")
-        
+
         except Exception as e:
             print(f"❌ Connection error: {e}")
             print("💡 Make sure the ANP agent service is running on http://localhost:8000")
             return 1
-    
+
     print("\n✨ Example completed!")
     return 0
 
@@ -210,7 +208,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help"]:
         print_usage()
         sys.exit(0)
-    
+
     try:
         exit_code = asyncio.run(main())
         sys.exit(exit_code)

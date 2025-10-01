@@ -123,7 +123,7 @@
 
 #### 3.1 智能体描述端点
 ```
-GET /agents/travel/test/ad.json
+GET /agents/test/ad.json
 ```
 - **功能**：返回符合ANP规范的智能体描述
 - **认证**：需要DID-WBA认证
@@ -131,8 +131,8 @@ GET /agents/travel/test/ad.json
 
 #### 3.2 API资源端点
 ```
-GET /agents/travel/test/api/{json_file}
-GET /agents/travel/test/api_files/{yaml_file}
+GET /agents/test/api/{json_file}
+GET /agents/test/api_files/{yaml_file}
 ```
 - **功能**：提供API定义文件
 - **认证**：需要DID-WBA认证

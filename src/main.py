@@ -69,9 +69,9 @@ async def root():
         "protocol_version": "1.0.0",
         "description": "基于FastAPI实现的ANP协议智能体示例服务",
         "endpoints": {
-            "agent_description": "/agents/travel/test/ad.json",
-            "api_resources": "/agents/travel/test/api/{json_file}",
-            "yaml_resources": "/agents/travel/test/api_files/{yaml_file}",
+            "agent_description": "/agents/test/ad.json",
+            "api_resources": "/agents/test/api/{json_file}",
+            "yaml_resources": "/agents/test/api_files/{yaml_file}",
             "documentation": "/docs",
             "openapi_spec": "/openapi.json"
         },

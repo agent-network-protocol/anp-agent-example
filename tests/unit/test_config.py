@@ -31,7 +31,7 @@ def test_default_config_values():
     assert config.ANP_PROTOCOL_VERSION == "1.0.0"
     assert config.JWT_ALGORITHM == "RS256"
     assert config.API_PREFIX == "/agents"
-    assert config.AGENT_PATH_PREFIX == "/travel/test"
+    assert config.AGENT_PATH_PREFIX == "/test"
 
 
 @patch.dict(os.environ, {"AGENT_DESCRIPTION_JSON_DOMAIN": "custom-test.com"})

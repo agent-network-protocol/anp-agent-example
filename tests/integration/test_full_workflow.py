@@ -53,8 +53,8 @@ class TestFullWorkflow:
 
         # 3. 尝试访问API资源端点（无认证）
         api_endpoints = [
-            "/agents/travel/test/api/external-interface.json",
-            "/agents/travel/test/api_files/nl-interface.yaml"
+            "/agents/test/api/external-interface.json",
+            "/agents/test/api_files/nl-interface.yaml"
         ]
 
         for endpoint in api_endpoints:

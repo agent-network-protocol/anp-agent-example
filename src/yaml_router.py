@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agents")
 
-@router.get("/travel/test/api_files/{yaml_file}")
+@router.get("/test/api_files/{yaml_file}")
 async def get_yaml_file(yaml_file: str):
     """
     获取测试智能体的YAML接口定义文件

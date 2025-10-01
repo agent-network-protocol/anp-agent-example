@@ -21,7 +21,7 @@ ANP_PROTOCOL_VERSION = "1.0.0"
 
 # API configuration
 API_PREFIX = "/agents"
-AGENT_PATH_PREFIX = "/travel/test"
+AGENT_PATH_PREFIX = "/test"
 
 # Authentication configuration
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "RS256")

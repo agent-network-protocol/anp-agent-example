@@ -25,9 +25,9 @@ class TestAuthMiddleware:
     async def test_protected_paths_require_auth(self, async_client: AsyncClient):
         """测试受保护的路径需要认证"""
         protected_paths = [
-            "/agents/travel/test/ad.json",
-            "/agents/travel/test/api/external-interface.json",
-            "/agents/travel/test/api_files/nl-interface.yaml"
+            "/agents/test/ad.json",
+            "/agents/test/api/external-interface.json",
+            "/agents/test/api_files/nl-interface.yaml"
         ]
 
         for path in protected_paths:
@@ -47,7 +47,7 @@ class TestAuthMiddleware:
             {"Authorization": "Bearer "},  # 空令牌
         ]
 
-        test_path = "/agents/travel/test/ad.json"
+        test_path = "/agents/test/ad.json"
 
         for headers in invalid_headers:
             response = await async_client.get(test_path, headers=headers)
@@ -63,7 +63,7 @@ class TestAuthMiddleware:
             "Bearer not.a.jwt.at.all",  # 完全不是JWT格式
         ]
 
-        test_path = "/agents/travel/test/ad.json"
+        test_path = "/agents/test/ad.json"
 
         for token in malformed_tokens:
             headers = {"Authorization": token}
@@ -73,7 +73,7 @@ class TestAuthMiddleware:
     @pytest.mark.asyncio
     async def test_auth_middleware_error_responses(self, async_client: AsyncClient):
         """测试认证中间件的错误响应格式"""
-        response = await async_client.get("/agents/travel/test/ad.json")
+        response = await async_client.get("/agents/test/ad.json")
         assert response.status_code == 401
 
         # 检查错误响应格式
@@ -85,7 +85,7 @@ class TestAuthMiddleware:
     @pytest.mark.asyncio
     async def test_case_insensitive_authorization_header(self, async_client: AsyncClient):
         """测试Authorization头的大小写不敏感性"""
-        test_path = "/agents/travel/test/ad.json"
+        test_path = "/agents/test/ad.json"
 
         # 测试不同的大小写组合
         header_variations = [
@@ -102,7 +102,7 @@ class TestAuthMiddleware:
     @pytest.mark.asyncio
     async def test_multiple_authorization_headers(self, async_client: AsyncClient):
         """测试多个Authorization头的处理"""
-        test_path = "/agents/travel/test/ad.json"
+        test_path = "/agents/test/ad.json"
 
         # httpx通常不允许重复头，但我们可以测试头值包含多个值的情况
         headers = {"Authorization": "Bearer token1, Bearer token2"}
@@ -112,7 +112,7 @@ class TestAuthMiddleware:
     @pytest.mark.asyncio
     async def test_auth_middleware_with_query_parameters(self, async_client: AsyncClient):
         """测试带查询参数的认证请求"""
-        test_path = "/agents/travel/test/ad.json?param=value&another=test"
+        test_path = "/agents/test/ad.json?param=value&another=test"
 
         response = await async_client.get(test_path)
         # 即使有查询参数，认证仍然是必需的
@@ -123,9 +123,9 @@ class TestAuthMiddleware:
         """测试认证中间件保持路径信息的完整性"""
         # 测试路径中的特殊字符
         special_paths = [
-            "/agents/travel/test/api/file%20with%20spaces.json",
-            "/agents/travel/test/api/file-with-dashes.json",
-            "/agents/travel/test/api/file_with_underscores.json"
+            "/agents/test/api/file%20with%20spaces.json",
+            "/agents/test/api/file-with-dashes.json",
+            "/agents/test/api/file_with_underscores.json"
         ]
 
         for path in special_paths:

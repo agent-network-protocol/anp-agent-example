@@ -14,27 +14,27 @@ class TestAgentEndpoints:
     @pytest.mark.asyncio
     async def test_agent_description_without_auth(self, async_client: AsyncClient):
         """测试未认证访问智能体描述端点应返回401"""
-        response = await async_client.get("/agents/travel/test/ad.json")
+        response = await async_client.get("/agents/test/ad.json")
         # 应该返回未授权错误
         assert response.status_code == 401
 
     @pytest.mark.asyncio
     async def test_api_json_file_without_auth(self, async_client: AsyncClient):
         """测试未认证访问JSON API文件应返回401"""
-        response = await async_client.get("/agents/travel/test/api/external-interface.json")
+        response = await async_client.get("/agents/test/api/external-interface.json")
         assert response.status_code == 401
 
     @pytest.mark.asyncio
     async def test_api_yaml_file_without_auth(self, async_client: AsyncClient):
         """测试未认证访问YAML API文件应返回401"""
-        response = await async_client.get("/agents/travel/test/api_files/nl-interface.yaml")
+        response = await async_client.get("/agents/test/api_files/nl-interface.yaml")
         assert response.status_code == 401
 
     @pytest.mark.asyncio
     async def test_agent_description_with_mock_auth(self, async_client: AsyncClient, mock_jwt_token: str):
         """使用模拟认证测试智能体描述端点（可能失败，用于发现认证问题）"""
         headers = {"Authorization": mock_jwt_token}
-        response = await async_client.get("/agents/travel/test/ad.json", headers=headers)
+        response = await async_client.get("/agents/test/ad.json", headers=headers)
 
         # 这里可能返回401（认证失败）或200（认证成功）
         # 我们记录结果以便后续分析
@@ -51,7 +51,7 @@ class TestAgentEndpoints:
     async def test_json_api_file_access(self, async_client: AsyncClient):
         """测试JSON API文件访问"""
         # 先测试不存在的文件
-        response = await async_client.get("/agents/travel/test/api/nonexistent.json")
+        response = await async_client.get("/agents/test/api/nonexistent.json")
         # 应该返回401（未认证）而不是404，因为认证在前
         assert response.status_code == 401
 
@@ -59,7 +59,7 @@ class TestAgentEndpoints:
     async def test_yaml_api_file_access(self, async_client: AsyncClient):
         """测试YAML API文件访问"""
         # 测试不存在的文件
-        response = await async_client.get("/agents/travel/test/api_files/nonexistent.yaml")
+        response = await async_client.get("/agents/test/api_files/nonexistent.yaml")
         # 应该返回401（未认证）
         assert response.status_code == 401
 
@@ -68,9 +68,9 @@ class TestAgentEndpoints:
         """测试智能体端点的路径验证"""
         # 测试错误的路径格式
         invalid_paths = [
-            "/agents/travel/test/ad.xml",  # 错误的文件扩展名
-            "/agents/travel/test/api/",    # 缺少文件名
-            "/agents/travel/test/api_files/",  # 缺少文件名
+            "/agents/test/ad.xml",  # 错误的文件扩展名
+            "/agents/test/api/",    # 缺少文件名
+            "/agents/test/api_files/",  # 缺少文件名
             "/agents/wrong/path/ad.json",  # 错误的路径
         ]
 
@@ -83,9 +83,9 @@ class TestAgentEndpoints:
     async def test_agent_endpoints_methods(self, async_client: AsyncClient):
         """测试智能体端点只接受GET方法"""
         endpoints = [
-            "/agents/travel/test/ad.json",
-            "/agents/travel/test/api/external-interface.json",
-            "/agents/travel/test/api_files/nl-interface.yaml"
+            "/agents/test/ad.json",
+            "/agents/test/api/external-interface.json",
+            "/agents/test/api_files/nl-interface.yaml"
         ]
 
         for endpoint in endpoints:

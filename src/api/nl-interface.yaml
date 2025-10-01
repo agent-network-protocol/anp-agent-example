@@ -6,7 +6,7 @@ info:
 servers:
   - url: https://agent-connect.ai
 paths:
-  /agents/travel/test/api/ask:
+  /agents/test/api/ask:
     post:
       summary: "askQuestion"
       description: "使用自然语言提问并获取自然语言回答，支持SSE返回"
@@ -88,7 +88,7 @@ paths:
                   error:
                     type: string
                     description: "错误信息"
-  /agents/travel/test/api/chat/history:
+  /agents/test/api/chat/history:
     get:
       summary: "getChatHistory"
       description: "获取用户的聊天历史记录"

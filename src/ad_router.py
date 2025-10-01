@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agents")
 
-@router.get("/travel/test/ad.json")
+@router.get("/test/ad.json")
 async def get_test_agent_description():
     """
     提供测试智能体的描述信息（符合ANP规范）
@@ -30,7 +30,7 @@ async def get_test_agent_description():
             "protocolType": "ANP",
             "protocolVersion": "1.0.0",
             "type": "AgentDescription",
-            "url": get_agent_url("/agents/travel/test/ad.json"),
+            "url": get_agent_url("/agents/test/ad.json"),
             "name": "测试智能体",
             "did": get_agent_did("test-agent"),
             "owner": {
@@ -52,12 +52,12 @@ async def get_test_agent_description():
                 {
                     "type": "Information",
                     "description": "测试智能体的基本信息和服务说明",
-                    "url": get_agent_url("/agents/travel/test/info/basic-info.json")
+                    "url": get_agent_url("/agents/test/info/basic-info.json")
                 },
                 {
                     "type": "Product",
                     "description": "测试产品信息，用于演示产品描述规范",
-                    "url": get_agent_url("/agents/travel/test/products/test-product.json")
+                    "url": get_agent_url("/agents/test/products/test-product.json")
                 }
             ],
             "interfaces": [
@@ -65,7 +65,7 @@ async def get_test_agent_description():
                     "type": "StructuredInterface",
                     "protocol": "openrpc",
                     "version": "1.3.2",
-                    "url": get_agent_url("/agents/travel/test/api/external-interface.json"),
+                    "url": get_agent_url("/agents/test/api/external-interface.json"),
                     "description": "外部OpenRPC接口，提供测试智能体的基础服务API"
                 },
                 {
@@ -187,7 +187,7 @@ async def get_test_agent_description():
                     "type": "NaturalLanguageInterface",
                     "protocol": "YAML",
                     "version": "1.0.0",
-                    "url": get_agent_url("/agents/travel/test/api/nl-interface.yaml"),
+                    "url": get_agent_url("/agents/test/api/nl-interface.yaml"),
                     "description": "自然语言接口，支持与测试智能体进行对话交互"
                 }
             ]

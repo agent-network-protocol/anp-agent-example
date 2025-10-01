@@ -85,7 +85,7 @@ import httpx
 async with httpx.AsyncClient() as client:
     headers = {"Authorization": "Bearer mock-token"}
     response = await client.get(
-        "http://localhost:8000/agents/travel/test/ad.json",
+        "http://localhost:8000/agents/test/ad.json",
         headers=headers
     )
     agent_desc = response.json()
@@ -105,7 +105,7 @@ authenticator = DIDWbaAuthHeader(
 )
 
 async with httpx.AsyncClient() as client:
-    url = "http://localhost:8000/agents/travel/test/ad.json"
+    url = "http://localhost:8000/agents/test/ad.json"
     
     # Get authentication headers
     auth_headers = authenticator.get_auth_header(url, force_new=True)
@@ -127,9 +127,9 @@ async with httpx.AsyncClient() as client:
   "protocol_version": "1.0.0",
   "description": "基于FastAPI实现的ANP协议智能体示例服务",
   "endpoints": {
-    "agent_description": "/agents/travel/test/ad.json",
-    "api_resources": "/agents/travel/test/api/{json_file}",
-    "yaml_resources": "/agents/travel/test/api_files/{yaml_file}",
+    "agent_description": "/agents/test/ad.json",
+    "api_resources": "/agents/test/api/{json_file}",
+    "yaml_resources": "/agents/test/api_files/{yaml_file}",
     "documentation": "/docs",
     "openapi_spec": "/openapi.json"
   },
@@ -145,7 +145,7 @@ async with httpx.AsyncClient() as client:
   "protocolType": "ANP",
   "protocolVersion": "1.0.0",
   "type": "AgentDescription",
-  "url": "https://agent-connect.ai/agents/travel/test/ad.json",
+  "url": "https://agent-connect.ai/agents/test/ad.json",
   "name": "测试智能体",
   "did": "did:wba:agent-connect.ai:service:test-agent",
   "owner": {

@@ -74,7 +74,7 @@ class ANPAgentClient:
         if not self.authenticator:
             raise ValueError("Authentication not setup. Call setup_did_authentication() first.")
 
-        url = f"{self.base_url}/agents/travel/test/ad.json"
+        url = f"{self.base_url}/agents/test/ad.json"
 
         timeout = httpx.Timeout(10.0)
         async with httpx.AsyncClient(timeout=timeout) as client:

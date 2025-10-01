@@ -51,7 +51,7 @@ async def quick_test():
 
             # Test 2: Agent description with DID auth
             print("2️⃣ Agent description...", end=" ")
-            url = f"{base_url}/agents/travel/test/ad.json"
+            url = f"{base_url}/agents/test/ad.json"
             auth_headers = authenticator.get_auth_header(url, force_new=True)
 
             response = await client.get(url, headers=auth_headers)

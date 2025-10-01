@@ -73,8 +73,8 @@ class TestANPCompliance:
         # 但我们可以验证端点结构是否符合ANP规范要求
 
         expected_api_endpoints = [
-            "/agents/travel/test/api/external-interface.json",
-            "/agents/travel/test/api_files/nl-interface.yaml"
+            "/agents/test/api/external-interface.json",
+            "/agents/test/api_files/nl-interface.yaml"
         ]
 
         for endpoint in expected_api_endpoints:
@@ -86,7 +86,7 @@ class TestANPCompliance:
     async def test_anp_agent_path_structure(self, async_client: AsyncClient):
         """测试ANP智能体路径结构是否正确"""
         # ANP规范要求智能体描述路径格式为 /agents/{domain}/{name}/ad.json
-        agent_description_path = "/agents/travel/test/ad.json"
+        agent_description_path = "/agents/test/ad.json"
 
         response = await async_client.get(agent_description_path)
         # 应该返回401（需要认证）而不是404（路径不存在）
@@ -96,9 +96,9 @@ class TestANPCompliance:
     async def test_http_methods_compliance(self, async_client: AsyncClient):
         """测试HTTP方法使用是否符合ANP规范"""
         anp_endpoints = [
-            "/agents/travel/test/ad.json",
-            "/agents/travel/test/api/external-interface.json",
-            "/agents/travel/test/api_files/nl-interface.yaml"
+            "/agents/test/ad.json",
+            "/agents/test/api/external-interface.json",
+            "/agents/test/api_files/nl-interface.yaml"
         ]
 
         for endpoint in anp_endpoints:
@@ -133,7 +133,7 @@ class TestANPCompliance:
     async def test_anp_error_response_format(self, async_client: AsyncClient):
         """测试ANP错误响应格式"""
         # 测试认证错误响应
-        response = await async_client.get("/agents/travel/test/ad.json")
+        response = await async_client.get("/agents/test/ad.json")
         assert response.status_code == 401
 
         # 检查是否返回了有意义的错误信息

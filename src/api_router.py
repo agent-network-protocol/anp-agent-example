@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agents")
 
-@router.get("/travel/test/api/{json_file}")
+@router.get("/test/api/{json_file}")
 async def get_json_file(json_file: str):
     """
     获取测试智能体的API接口定义文件

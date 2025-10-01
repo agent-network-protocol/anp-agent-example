@@ -52,9 +52,9 @@ The service will be available at `http://localhost:8000`.
 
 - `GET /` - Root endpoint with service information
 - `GET /health` - Health check endpoint
-- `GET /agents/travel/test/ad.json` - Agent description (requires authentication)
-- `GET /agents/travel/test/api/{json_file}` - JSON API definition files
-- `GET /agents/travel/test/api_files/{yaml_file}` - YAML API definition files
+- `GET /agents/test/ad.json` - Agent description (requires authentication)
+- `GET /agents/test/api/{json_file}` - JSON API definition files
+- `GET /agents/test/api_files/{yaml_file}` - YAML API definition files
 - `GET /docs` - Interactive API documentation (Swagger UI)
 
 ## Authentication
