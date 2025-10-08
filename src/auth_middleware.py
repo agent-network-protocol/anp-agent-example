@@ -10,6 +10,12 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
+# Import DID-WBA verifier from agent-connect library
+from agent_connect.authentication.did_wba_verifier import (
+    DidWbaVerifier,
+    DidWbaVerifierConfig,
+    DidWbaVerifierError,
+)
 from fastapi import HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
@@ -17,13 +23,6 @@ from fastapi.responses import JSONResponse
 import config
 
 logger = logging.getLogger(__name__)
-
-# Import DID-WBA verifier from agent-connect library
-from agent_connect.authentication.did_wba_verifier import (
-    DidWbaVerifier,
-    DidWbaVerifierConfig,
-    DidWbaVerifierError,
-)
 
 # Define exempt paths that don't require authentication
 EXEMPT_PATHS = [
