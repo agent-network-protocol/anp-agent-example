@@ -25,6 +25,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")
 DEFAULT_OPENAI_MODEL = os.getenv("DEFAULT_OPENAI_MODEL")
 
+# Server Configuration
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = int(os.getenv("PORT", "8000"))
+AGENT_DESCRIPTION_JSON_DOMAIN = os.getenv("AGENT_DESCRIPTION_JSON_DOMAIN", f"{HOST}:{PORT}")
+
 
 class OpenAISettings:
     """Container for OpenAI-related configuration values."""
@@ -40,6 +45,27 @@ class OpenAISettings:
         if not self.api_key:
             errors.append("OPENAI_API_KEY is required for OpenAI access.")
         return errors
+
+
+class ServerSettings:
+    """Container for server configuration values."""
+
+    def __init__(self) -> None:
+        self.host = HOST
+        self.port = PORT
+        self.agent_description_json_domain = AGENT_DESCRIPTION_JSON_DOMAIN
+
+    def get_agent_url(self, path: str = "") -> str:
+        """
+        Generate the full URL for agent resources.
+
+        Args:
+            path: Resource path beginning with a slash.
+
+        Returns:
+            Fully qualified URL string.
+        """
+        return get_agent_url(self.agent_description_json_domain, path)
 
 
 def load_public_did(document_path: Path) -> str:
@@ -70,4 +96,39 @@ def load_public_did(document_path: Path) -> str:
     return did.strip()
 
 
+def get_agent_url(ad_domain: str, path: str) -> str:
+    """
+    Generate the full URL for agent resources.
+
+    Args:
+        path: Resource path beginning with a slash.
+
+    Returns:
+        Fully qualified URL string.
+    """
+    import ipaddress
+
+    domain = ad_domain
+    host = domain
+
+    if ":" in domain:
+        if domain.startswith("["):
+            bracket_end = domain.find("]")
+            if bracket_end != -1:
+                host = domain[1:bracket_end]
+        else:
+            host = domain.rsplit(":", 1)[0]
+
+    if host in ("localhost", "127.0.0.1", "::1"):
+        protocol = "http"
+    else:
+        try:
+            ipaddress.ip_address(host)
+            protocol = "http"
+        except ValueError:
+            protocol = "https"
+
+    return f"{protocol}://{domain}{path}"
+
 settings = OpenAISettings()
+server_settings = ServerSettings()

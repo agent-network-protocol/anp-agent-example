@@ -59,9 +59,9 @@ A complete ANP agent built with **FastANP**:
 - **greet interface** (link reference): Personalized greeting with session management
 
 **Key Endpoints:**
-- `/agents/remote/ad.json` - Agent Description
-- `/agents/remote/jsonrpc` - JSON-RPC API
-- `/agents/remote/api/greet.json` - Greet interface definition
+- `/agents/test/ad.json` - Agent Description
+- `/agents/test/jsonrpc` - JSON-RPC API
+- `/agents/test/api/greet.json` - Greet interface definition
 - `/docs` - Swagger UI
 
 ### Local Client (`src/local_agent.py`)
@@ -98,7 +98,7 @@ if greet in anp.interfaces:
     interfaces.append(anp.interfaces[greet].link_summary)
 ```
 
-Access the separate file at: `/agents/remote/api/greet.json`
+Access the separate file at: `/agents/test/api/greet.json`
 
 ## Usage Examples
 
@@ -131,7 +131,7 @@ asyncio.run(main())
 
 **Test echo method:**
 ```bash
-curl -X POST http://localhost:8000/agents/remote/jsonrpc \
+curl -X POST http://localhost:8000/agents/test/jsonrpc \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -143,7 +143,7 @@ curl -X POST http://localhost:8000/agents/remote/jsonrpc \
 
 **Test greet method:**
 ```bash
-curl -X POST http://localhost:8000/agents/remote/jsonrpc \
+curl -X POST http://localhost:8000/agents/test/jsonrpc \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -155,12 +155,12 @@ curl -X POST http://localhost:8000/agents/remote/jsonrpc \
 
 **Get agent description:**
 ```bash
-curl http://localhost:8000/agents/remote/ad.json
+curl http://localhost:8000/agents/test/ad.json
 ```
 
 **Get greet interface definition:**
 ```bash
-curl http://localhost:8000/agents/remote/api/greet.json
+curl http://localhost:8000/agents/test/api/greet.json
 ```
 
 ## Project Structure
@@ -201,7 +201,7 @@ anp-agent-example/
 The greet method demonstrates session context usage:
 
 ```python
-@anp.interface("/agents/remote/api/greet.json", description="...")
+@anp.interface("/agents/test/api/greet.json", description="...")
 def greet(params: GreetParams, ctx: Context) -> dict:
     # Access session
     session_id = ctx.session.id

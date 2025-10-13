@@ -21,13 +21,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from config import load_public_did
+from config import load_public_did, server_settings
 
 _project_root = Path(__file__).parent.parent
 
-HOST = "0.0.0.0"
-PORT = 8000
-AGENT_DESCRIPTION_JSON_DOMAIN=f"{HOST}:{PORT}"
+# Use centralized configuration
+HOST = server_settings.host
+PORT = server_settings.port
+AGENT_DESCRIPTION_JSON_DOMAIN = server_settings.agent_description_json_domain
 LOG_LEVEL = "INFO"
 
 # did document path
@@ -48,10 +49,6 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="ANP Remote Agent",
     description="Remote ANP protocol agent providing test interfaces and services",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json"
 )
 
 # Add CORS middleware
@@ -82,14 +79,14 @@ anp = FastANP(
     app=app,
     name="Remote Test Agent",
     description="Remote ANP agent for testing agent-to-agent communication",
-    base_url="http://localhost:8000",
+    base_url=server_settings.get_agent_url(""),
     did=load_public_did(PUBLIC_DID_DOCUMENT_PATH),
     owner={
         "type": "Organization",
-        "name": AGENT_DESCRIPTION_JSON_DOMAIN,
-        "url": "http://localhost:8000",
+        "name": server_settings.agent_description_json_domain,
+        "url": server_settings.get_agent_url(""),
     },
-    jsonrpc_server_url="/agents/remote/jsonrpc",
+    jsonrpc_server_path="/agents/test/jsonrpc",
     jsonrpc_server_name="Remote Agent JSON-RPC API",
     jsonrpc_server_description="Remote Agent JSON-RPC API for ANP protocol",
     enable_auth_middleware=True,  # Disable auth for demo
@@ -112,7 +109,7 @@ class GreetParams(BaseModel):
 
 
 # Custom ad.json route
-@app.get("/agents/remote/ad.json", tags=["agent"])
+@app.get("/agents/test/ad.json", tags=["agent"])
 def get_agent_description():
     """
     Get Agent Description for the remote agent.
@@ -125,7 +122,7 @@ def get_agent_description():
         {
             "type": "Information",
             "description": "Remote ANP agent for testing agent-to-agent communication",
-            "url": get_agent_url("/agents/remote/info/basic-info.json")
+            "url": server_settings.get_agent_url("/agents/test/info/basic-info.json")
         }
     ]
 
@@ -140,7 +137,7 @@ def get_agent_description():
 
 # Register interface methods
 
-@anp.interface("/agents/remote/api/echo.json", description="Echo a provided message")
+@anp.interface("/agents/test/api/echo.json", description="Echo a provided message")
 def echo(params: EchoParams) -> dict:
     """
     Echo a provided message.
@@ -158,7 +155,7 @@ def echo(params: EchoParams) -> dict:
     }
 
 
-@anp.interface("/agents/remote/api/greet.json", description="Generate personalized greeting")
+@anp.interface("/agents/test/api/greet.json", description="Generate personalized greeting")
 def greet(params: GreetParams, ctx: Context) -> dict:
     """
     Generate personalized greeting with session context.
@@ -194,7 +191,7 @@ def greet(params: GreetParams, ctx: Context) -> dict:
 
 # Additional static routes (user-defined)
 
-@app.get("/agents/remote/info/basic-info.json", tags=["information"])
+@app.get("/agents/test/info/basic-info.json", tags=["information"])
 def get_basic_info():
     """Get basic agent information."""
     return {
@@ -202,7 +199,7 @@ def get_basic_info():
         "title": "Remote Agent Overview",
         "summary": "Remote ANP agent for testing agent-to-agent communication",
         "owner": {
-            "name": AGENT_DESCRIPTION_JSON_DOMAIN,
+            "name": server_settings.agent_description_json_domain,
             "contact": "support@agent-connect.ai",
         },
         "capabilities": [
@@ -213,47 +210,13 @@ def get_basic_info():
     }
 
 
-def get_agent_url(path: str) -> str:
-    """
-    Generate the full URL for agent resources.
-
-    Args:
-        path: Resource path beginning with a slash.
-
-    Returns:
-        Fully qualified URL string.
-    """
-    import ipaddress
-
-    domain = AGENT_DESCRIPTION_JSON_DOMAIN
-    host = domain
-
-    if ":" in domain:
-        if domain.startswith("["):
-            bracket_end = domain.find("]")
-            if bracket_end != -1:
-                host = domain[1:bracket_end]
-        else:
-            host = domain.rsplit(":", 1)[0]
-
-    if host in ("localhost", "127.0.0.1", "::1"):
-        protocol = "http"
-    else:
-        try:
-            ipaddress.ip_address(host)
-            protocol = "http"
-        except ValueError:
-            protocol = "https"
-
-    return f"{protocol}://{domain}{path}"
-
 def main():
     """Run the ANP remote agent server."""
     import uvicorn
 
     logger.info("Starting ANP Remote Agent Service...")
-    logger.info(f"- Agent Description: http://{HOST}:{PORT}/agents/remote/ad.json")
-    logger.info(f"- JSON-RPC endpoint: http://{HOST}:{PORT}/agents/remote/jsonrpc")
+    logger.info(f"- Agent Description: http://{HOST}:{PORT}/agents/test/ad.json")
+    logger.info(f"- JSON-RPC endpoint: http://{HOST}:{PORT}/agents/test/jsonrpc")
     logger.info(f"- Health check: http://{HOST}:{PORT}/health")
     logger.info(f"- API Docs: http://{HOST}:{PORT}/docs")
 

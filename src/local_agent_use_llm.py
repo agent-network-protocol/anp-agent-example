@@ -26,6 +26,7 @@ if str(project_root) not in sys.path:
 # Import after adjusting sys.path
 from anp.anp_crawler.anp_crawler import ANPCrawler  # noqa: E402
 
+from config import server_settings  # noqa: E402
 from config import settings as openai_settings  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -36,14 +37,14 @@ class LLMLocalAgent:
 
     def __init__(
         self,
-        agent_url: str,
-        model: str | None,
-        temperature: float,
+        agent_description_url: str,
+        model: str | None = None,
+        temperature: float = 0.0,
         did_document_path: Path | None = None,
         private_key_path: Path | None = None,
     ) -> None:
-        self.agent_url = agent_url.rstrip("/")
-        self.agent_description_url = f"{self.agent_url}/agents/remote/ad.json"
+
+        self.agent_description_url = agent_description_url
         self.model = model or openai_settings.default_model or "gpt-4.1-mini"
         self.temperature = temperature
 
@@ -76,14 +77,14 @@ class LLMLocalAgent:
         self.system_prompt = self._build_system_prompt()
 
         logger.debug(
-            "Initialized LLMLocalAgent with agent_url=%s, model=%s", self.agent_url, self.model
+            "Initialized LLMLocalAgent with agent_description_url=%s, model=%s", self.agent_description_url, self.model
         )
 
     def _build_system_prompt(self) -> str:
         """Compose the system prompt guiding the LLM's strategy."""
         return (
             f"You are an orchestration agent controlling ANPCrawler to interact with a remote ANP "
-            f"service located at {self.agent_url}. Always begin by calling the fetch_text tool on the "
+            f"service located at {self.agent_description_url}. Always begin by calling the fetch_text tool on the "
             f"agent description URL {self.agent_description_url} to discover available interfaces. When invoking "
             f"execute_tool_call, wrap remote parameters inside the 'params' key if required by the "
             f"target interface. Respond with concise JSON-formattable conclusions once you have the "
@@ -195,17 +196,22 @@ class LLMLocalAgent:
 
             if not message.tool_calls:
                 final_content = message.content or ""
-                logger.info("LLM response: %s", final_content)
+                logger.info("LLM final response (no tool calls): %s", final_content)
                 return final_content
 
+            logger.info("LLM requested %d tool call(s)", len(message.tool_calls))
             for tool_call in message.tool_calls:
                 tool_name = tool_call.function.name
+                logger.info("Calling tool: %s", tool_name)
                 try:
                     args = json.loads(tool_call.function.arguments or "{}")
+                    logger.info("Tool arguments: %s", json.dumps(args, ensure_ascii=False))
                 except json.JSONDecodeError as exc:
+                    logger.error("Failed to parse tool arguments: %s", exc)
                     tool_result = {"error": f"Invalid JSON arguments: {exc}"}
                 else:
                     tool_result = await self._invoke_tool(tool_name, args)
+                    logger.info("Tool result: %s", json.dumps(tool_result, ensure_ascii=False)[:200])
 
                 messages.append(
                     {
@@ -265,18 +271,25 @@ async def async_main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    prompt = "帮我调用echo"
-    agent_url = "http://localhost:8000"
+    # More explicit prompt that encourages tool usage
+    prompt = "Please use the echo tool to send the message 'Hello from LLM Agent!' and show me the response."
     model_name = openai_settings.default_model or "gpt-4o-mini"
     temperature = 0.0
 
     agent = LLMLocalAgent(
-        agent_url=agent_url,
+        agent_description_url=f"http://{server_settings.host}:{server_settings.port}/agents/test/ad.json",
         model=model_name,
         temperature=temperature,
-    )
+    )  # Uses centralized configuration for agent_description_url
+
+    logger.info("Starting LLM agent with prompt: %s", prompt)
+    logger.info("Using model: %s", model_name)
 
     final_response = await agent.run(prompt)
+
+    logger.info("="*60)
+    logger.info("Final Response:")
+    logger.info("="*60)
     print(final_response)
 
 

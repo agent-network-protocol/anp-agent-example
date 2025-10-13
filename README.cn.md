@@ -59,9 +59,9 @@ PYTHONPATH=src uv run python src/local_agent.py
 - **greet 接口**（链接引用）：带会话管理的个性化问候
 
 **关键端点：**
-- `/agents/remote/ad.json` - 智能体描述
-- `/agents/remote/jsonrpc` - JSON-RPC API
-- `/agents/remote/api/greet.json` - Greet 接口定义
+- `/agents/test/ad.json` - 智能体描述
+- `/agents/test/jsonrpc` - JSON-RPC API
+- `/agents/test/api/greet.json` - Greet 接口定义
 - `/docs` - Swagger UI
 
 ### 本地客户端（`src/local_agent.py`）
@@ -98,7 +98,7 @@ if greet in anp.interfaces:
     interfaces.append(anp.interfaces[greet].link_summary)
 ```
 
-访问单独文件：`/agents/remote/api/greet.json`
+访问单独文件：`/agents/test/api/greet.json`
 
 ## 使用示例
 
@@ -131,7 +131,7 @@ asyncio.run(main())
 
 **测试 echo 方法：**
 ```bash
-curl -X POST http://localhost:8000/agents/remote/jsonrpc \
+curl -X POST http://localhost:8000/agents/test/jsonrpc \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -143,7 +143,7 @@ curl -X POST http://localhost:8000/agents/remote/jsonrpc \
 
 **测试 greet 方法：**
 ```bash
-curl -X POST http://localhost:8000/agents/remote/jsonrpc \
+curl -X POST http://localhost:8000/agents/test/jsonrpc \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -155,12 +155,12 @@ curl -X POST http://localhost:8000/agents/remote/jsonrpc \
 
 **获取智能体描述：**
 ```bash
-curl http://localhost:8000/agents/remote/ad.json
+curl http://localhost:8000/agents/test/ad.json
 ```
 
 **获取 greet 接口定义：**
 ```bash
-curl http://localhost:8000/agents/remote/api/greet.json
+curl http://localhost:8000/agents/test/api/greet.json
 ```
 
 ## 项目结构
@@ -201,7 +201,7 @@ anp-agent-example/
 greet 方法展示了会话上下文的使用：
 
 ```python
-@anp.interface("/agents/remote/api/greet.json", description="...")
+@anp.interface("/agents/test/api/greet.json", description="...")
 def greet(params: GreetParams, ctx: Context) -> dict:
     # 访问会话
     session_id = ctx.session.id

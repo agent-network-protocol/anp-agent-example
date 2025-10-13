@@ -15,6 +15,8 @@ import logging
 import sys
 from pathlib import Path
 
+from config import server_settings  # noqa: E402
+
 # Add project root to path for anp imports
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
@@ -33,15 +35,15 @@ logger = logging.getLogger(__name__)
 class RemoteAgentClient:
     """Client for crawling and interacting with remote ANP agent using ANPCrawler."""
 
-    def __init__(self, agent_url: str = "http://localhost:8000"):
+    def __init__(self, agent_description_url: str ):
         """
         Initialize the client.
 
         Args:
-            agent_url: Base URL of the remote agent
+            agent_url: Base URL of the remote agent. If None, uses server_settings configuration.
         """
-        self.agent_url = agent_url.rstrip('/')
-        self.agent_description_url = f"{self.agent_url}/agents/remote/ad.json"
+
+        self.agent_description_url = agent_description_url
 
         # Paths to DID document and private key
         self.did_document_path = str(project_root / "docs" / "did_public" / "public-did-doc.json")
@@ -54,7 +56,7 @@ class RemoteAgentClient:
             cache_enabled=True
         )
 
-        logger.info(f"Initialized RemoteAgentClient for {self.agent_url}")
+        logger.info(f"Initialized RemoteAgentClient for {self.agent_description_url}")
 
     async def fetch_agent_description(self):
         """
@@ -213,7 +215,8 @@ class RemoteAgentClient:
         logger.info("Demonstrating Direct JSON-RPC Call")
         logger.info("="*60)
 
-        endpoint = f"{self.agent_url}/agents/remote/jsonrpc"
+        endpoint = f"http://{server_settings.host}:{server_settings.port}/agents/test/jsonrpc"
+
         method = "echo"
         # FastANP expects params wrapped in 'params' key
         params = {"params": {"message": "Hello from direct JSON-RPC call!"}}
@@ -272,7 +275,8 @@ async def main():
     logger.info("="*60)
     logger.info("")
 
-    client = RemoteAgentClient("http://localhost:8000")
+    client = RemoteAgentClient(
+        agent_description_url=f"http://{server_settings.host}:{server_settings.port}/agents/test/ad.json")  # Uses centralized configuration
 
     try:
         # Step 1: Fetch and display agent description
