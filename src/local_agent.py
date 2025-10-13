@@ -202,6 +202,55 @@ class RemoteAgentClient:
         result = await self.call_tool("greet", {"params": {"name": name}})
         return result
 
+    async def test_call_jsonrpc(self):
+        """
+        Demonstrate direct JSON-RPC call to remote agent's echo method.
+
+        Returns:
+            JSON-RPC call result
+        """
+        logger.info("="*60)
+        logger.info("Demonstrating Direct JSON-RPC Call")
+        logger.info("="*60)
+
+        endpoint = f"{self.agent_url}/agents/remote/jsonrpc"
+        method = "echo"
+        # FastANP expects params wrapped in 'params' key
+        params = {"params": {"message": "Hello from direct JSON-RPC call!"}}
+        request_id = "jsonrpc-test-001"
+
+        logger.info(f"Endpoint: {endpoint}")
+        logger.info(f"Method: {method}")
+        logger.info(f"Params: {json.dumps(params, indent=2, ensure_ascii=False)}")
+        logger.info(f"Request ID: {request_id}")
+
+        try:
+            result = await self.crawler.execute_json_rpc(endpoint, method, params, request_id)
+
+            logger.info("\nJSON-RPC Call Result:")
+            logger.info(json.dumps(result, indent=2, ensure_ascii=False))
+
+            # Extract and display key information from the result
+            if result and isinstance(result, dict):
+                if 'success' in result and result['success']:
+                    # Success case
+                    actual_result = result.get('result', {})
+                    if 'response' in actual_result:
+                        logger.info(f"\n✅ Echo Response: {actual_result['response']}")
+                    if 'originalMessage' in actual_result:
+                        logger.info(f"   Original Message: {actual_result['originalMessage']}")
+                    if 'timestamp' in actual_result:
+                        logger.info(f"   Timestamp: {actual_result['timestamp']}")
+                elif 'error' in result:
+                    # Error case
+                    logger.error(f"\n❌ JSON-RPC Error: {result['error']}")
+
+            return result
+
+        except Exception as e:
+            logger.error(f"JSON-RPC call failed: {str(e)}")
+            raise
+
     def get_statistics(self):
         """
         Get crawler statistics.
@@ -253,7 +302,12 @@ async def main():
             await client.test_greet("Alice")
             logger.info("")
 
-        # Step 5: Display statistics
+        # Step 6: Test direct JSON-RPC call
+        logger.info("6️⃣  Testing Direct JSON-RPC Call...")
+        await client.test_call_jsonrpc()
+        logger.info("")
+
+        # Step 7: Display statistics
         logger.info("="*60)
         logger.info("Session Statistics:")
         logger.info("="*60)
