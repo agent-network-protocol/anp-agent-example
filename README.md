@@ -2,22 +2,20 @@
 
 [中文版本](README.cn.md) | English
 
-A minimal example demonstrating ANP (Agent Network Protocol) implementation using FastANP and ANPCrawler.
+This repository shows how to build and exercise an ANP (Agent Network Protocol) remote agent and companion clients. Documentation and implementation details live under `src/`; start there when you evaluate or extend the project.
 
 ## Overview
 
-This example includes:
-- **Remote Agent**: A complete ANP-compliant agent (server) using FastANP
-- **Local Client**: An ANPCrawler-based client that discovers and interacts with remote agents
+- **Remote agent**: A FastANP-powered server in `src/remote_agent.py` exposing echo and greeting interfaces.
+- **Local clients**: `src/local_agent.py` and `src/local_agent_use_llm.py` demonstrate how to discover, authenticate against, and invoke remote agents.
+- **Hosted environment**: The latest remote agent build is deployed and reachable via `https://agent-connect.ai/agents/test/ad.json`, so you can test without running local infrastructure.
 
-## Quick Start
+## Prerequisites
 
-### Prerequisites
+- Python 3.9 or newer
+- [uv](https://github.com/astral-sh/uv) for dependency resolution and execution
 
-- Python 3.9+
-- uv (recommended) or pip
-
-### Installation
+## Installation
 
 ```bash
 git clone <repository-url>
@@ -25,246 +23,103 @@ cd anp-agent-example
 uv sync
 ```
 
-### Running the Example
+`uv sync` installs all runtime and development dependencies defined in `pyproject.toml` and `uv.lock`.
 
-#### Step 1: Start Remote Agent
+## Environment Configuration
 
-```bash
-PYTHONPATH=src uv run python src/remote_agent.py
-```
+1. Copy `env.example` to `.env`:
+   ```bash
+   cp env.example .env
+   ```
 
-The remote agent will start on `http://localhost:8000`
+2. Review and adjust the configuration in `.env`:
+   - `HOST`: Server listen address (default: `0.0.0.0`)
+   - `PORT`: Server port (default: `8000`)
+   - `AGENT_DESCRIPTION_JSON_DOMAIN`: Domain used to generate `ad.json` URLs (use `localhost:8000` for local development, or your public domain like `agent-connect.ai` for deployment)
 
-#### Step 2: Run Client Test
+3. **OpenAI configuration is only required when running `src/local_agent_use_llm.py`**:
+   - `OPENAI_API_KEY`: OpenAI API key (required)
+   - `OPENAI_BASE_URL`: API endpoint (optional, supports compatible APIs like Moonshot)
+   - `DEFAULT_OPENAI_MODEL`: Default model (optional)
 
-In another terminal:
+## Running Locally
 
-```bash
-uv run python run_example.py
-```
+1. **Start the remote agent**
+   ```bash
+   PYTHONPATH=src uv run python src/remote_agent.py
+   ```
+   The agent serves JSON-RPC and documentation endpoints on `http://localhost:8000`.
 
-Or run the client directly:
+2. **Exercise the clients**
+   ```bash
+   uv run python run_example.py
+   PYTHONPATH=src uv run python src/local_agent.py
+   PYTHONPATH=src uv run python src/local_agent_use_llm.py
+   ```
+   The first command performs an end-to-end crawl and tool execution flow; the second validates the scripted ANPCrawler client; the third verifies the LLM-assisted client.
 
-```bash
-PYTHONPATH=src uv run python src/local_agent.py
-```
+## Using the Hosted Agent
 
-## Architecture
+- **Agent description**: `https://agent-connect.ai/agents/test/ad.json`
+- **Sample request**
+  ```bash
+  curl https://agent-connect.ai/agents/test/ad.json
+  ```
+- **JSON-RPC invocation**
+  ```bash
+  curl -X POST https://agent-connect.ai/agents/test/jsonrpc \
+    -H "Content-Type: application/json" \
+    -d '{
+      "jsonrpc": "2.0",
+      "method": "greet",
+      "params": {"params": {"name": "Alice"}},
+      "id": 1
+    }'
+  ```
+  Replace `greet` with `echo` to exercise the inline echo interface. Authentication-sensitive endpoints expect the same DID credentials described below.
 
-### Remote Agent (`src/remote_agent.py`)
-
-A complete ANP agent built with **FastANP**:
-- **ad.json**: Agent Description Document
-- **echo interface** (inline in ad.json): Simple message echo
-- **greet interface** (link reference): Personalized greeting with session management
-
-**Key Endpoints:**
-- `/agents/test/ad.json` - Agent Description
-- `/agents/test/jsonrpc` - JSON-RPC API
-- `/agents/test/api/greet.json` - Greet interface definition
-- `/docs` - Swagger UI
-
-### Local Client (`src/local_agent.py`)
-
-An **ANPCrawler**-based client that:
-- Discovers remote agents via their ad.json
-- Parses interface definitions automatically
-- Calls remote methods via JSON-RPC
-- Manages authentication and caching
-
-**Key Features:**
-- Automatic interface discovery
-- Built-in authentication (DID-WBA)
-- Response caching
-- Session management
-
-## Interface Types Demo
-
-The remote agent demonstrates two ways to include interfaces in ad.json:
-
-### 1. Inline Interface (echo)
-
-```python
-# Full definition embedded in ad.json
-if echo in anp.interfaces:
-    interfaces.append(anp.interfaces[echo].content)
-```
-
-### 2. Link Reference (greet)
-
-```python
-# Link to separate file
-if greet in anp.interfaces:
-    interfaces.append(anp.interfaces[greet].link_summary)
-```
-
-Access the separate file at: `/agents/test/api/greet.json`
-
-## Usage Examples
-
-### Using ANPCrawler (Python)
-
-```python
-from local_agent import RemoteAgentClient
-
-async def main():
-    client = RemoteAgentClient("http://localhost:8000")
-    
-    # Discover agent
-    await client.fetch_agent_description()
-    
-    # List available tools
-    tools = await client.list_available_tools()
-    
-    # Test echo
-    result = await client.test_echo("Hello!")
-    print(result['result']['response'])
-    
-    # Test greet
-    result = await client.test_greet("Alice")
-    print(result['result']['message'])
-
-asyncio.run(main())
-```
-
-### Using curl (Direct JSON-RPC)
-
-**Test echo method:**
-```bash
-curl -X POST http://localhost:8000/agents/test/jsonrpc \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "echo",
-    "params": {"params": {"message": "Hello"}},
-    "id": 1
-  }'
-```
-
-**Test greet method:**
-```bash
-curl -X POST http://localhost:8000/agents/test/jsonrpc \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "greet",
-    "params": {"params": {"name": "Alice"}},
-    "id": 1
-  }'
-```
-
-**Get agent description:**
-```bash
-curl http://localhost:8000/agents/test/ad.json
-```
-
-**Get greet interface definition:**
-```bash
-curl http://localhost:8000/agents/test/api/greet.json
-```
-
-## Project Structure
+## Project Layout
 
 ```
 anp-agent-example/
 ├── src/
-│   ├── remote_agent.py    # ANP agent (FastANP)
-│   ├── local_agent.py     # Client (ANPCrawler)
-│   └── config.py          # Configuration
-├── examples/
-│   └── simple_agent_test.py
-├── run_example.py         # Main test script
-└── README.md
+│   ├── config.py              # Runtime configuration defaults and environment bindings
+│   ├── remote_agent.py        # FastANP remote agent with echo and greet interfaces
+│   ├── local_agent.py         # ANPCrawler client for scripted interactions
+│   └── local_agent_use_llm.py # Example client incorporating LLM-assisted flows
+├── docs/
+│   ├── did_public/            # DID document and key material used during authentication
+│   └── jwt_key/               # JWT signing assets for local testing
+├── examples/                  # Lightweight runnable samples
+├── run_example.py             # High-level orchestrator for local demonstrations
+├── README.md
+└── README.cn.md
 ```
 
-## Key Features
+## Documentation and DID Assets
 
-### Remote Agent (FastANP)
+- `docs/did_public/public-did-doc.json` is the DID document referenced by the clients and remote agent. You can obtain production-ready DID materials through [didhost.cc](https://didhost.cc) and replace the sample files before deploying to your environment.
+- `docs/jwt_key/` contains sample RSA keys for JSON Web Token signing. Update these values or mount secrets in production.
+- Inline comments and interface descriptions in `src/` provide the most up-to-date guidance on extending the system; review `remote_agent.py` when adding routes or updating `ad.json` fields.
 
-1. **Easy Interface Definition**: Use decorators to define interfaces
-2. **Two Interface Types**: 
-   - Inline (echo) - Full definition in ad.json
-   - Link reference (greet) - Separate file
-3. **Session Management**: Built-in session context
-4. **Auto-generated OpenRPC**: Interface definitions auto-generated
+## Development Workflow
 
-### Local Client (ANPCrawler)
-
-1. **Automatic Discovery**: Crawls and parses agent descriptions
-2. **Interface Parsing**: Extracts and validates interface definitions
-3. **Authentication**: Built-in DID-WBA authentication
-4. **Caching**: Response caching for efficiency
-5. **Session Tracking**: Tracks visited URLs and statistics
-
-### Session Management Example
-
-The greet method demonstrates session context usage:
-
-```python
-@anp.interface("/agents/test/api/greet.json", description="...")
-def greet(params: GreetParams, ctx: Context) -> dict:
-    # Access session
-    session_id = ctx.session.id
-    visit_count = ctx.session.get("visit_count", 0)
-    visit_count += 1
-    ctx.session.set("visit_count", visit_count)
-    
-    return {
-        "message": f"Hello, {params.name}!",
-        "session_id": session_id,
-        "visit_count": visit_count
-    }
-```
-
-## Configuration
-
-Edit `src/config.py` or create `.env` file:
-
-```bash
-cp env.example .env
-```
-
-Key settings:
-- `PORT`: Remote agent port (default: 8000)
-- `AGENT_DESCRIPTION_JSON_DOMAIN`: Agent domain
-- `JWT_PRIVATE_KEY_PATH`: Path to JWT private key
-- `JWT_PUBLIC_KEY_PATH`: Path to JWT public key
-
-## Development
-
-### Run Tests
-
-```bash
-uv run pytest
-```
-
-### Code Style
-
-```bash
-uv run ruff check src
-```
-
-## API Documentation
-
-View interactive API documentation:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Run tests**
+  ```bash
+  uv run pytest
+  ```
+- **Lint and format**
+  ```bash
+  uv run ruff check src tests
+  uv run ruff format
+  ```
+- **Configuration overrides**: Copy `env.example` to `.env` to supply environment variables such as port, agent description domain, or key paths without modifying code.
 
 ## Troubleshooting
 
-### Port already in use
-
-Change `PORT` in `src/config.py`
-
-### Connection refused
-
-Make sure the remote agent is running before starting the client
-
-### Authentication errors
-
-The client needs valid DID document and private key files:
-- `docs/did_public/public-did-doc.json`
-- `docs/jwt_key/RS256-private.pem`
+- **Port conflicts**: Update `PORT` in `src/config.py` (or override via environment variable) before starting the agent.
+- **Authentication failures**: Ensure the DID document and key files in `docs/` match the credentials configured in `src/config.py`.
+- **Connectivity issues**: Confirm the remote agent process is running locally, or test against the hosted deployment using the URLs above.
 
 ## License
 

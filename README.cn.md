@@ -2,22 +2,20 @@
 
 中文版本 | [English](README.md)
 
-一个最小化的示例，演示使用 FastANP 和 ANPCrawler 实现 ANP（智能体网络协议）。
+本仓库展示如何构建并验证 ANP（Agent Network Protocol）远程智能体及配套客户端。实现细节与文档集中在 `src/` 目录，评估或扩展功能时请首先阅读该目录下的代码。
 
-## 概述
+## 概览
 
-本示例包括：
-- **远程智能体**：使用 FastANP 构建的完整 ANP 智能体（服务端）
-- **本地客户端**：基于 ANPCrawler 的客户端，可以发现并与远程智能体交互
+- **远程智能体**：`src/remote_agent.py` 使用 FastANP 暴露 echo 与 greet 接口。
+- **本地客户端**：`src/local_agent.py`、`src/local_agent_use_llm.py` 演示如何发现、认证并调用远程智能体。
+- **托管环境**：最新版本的远程智能体已部署，可通过 `https://agent-connect.ai/agents/test/ad.json` 直接测试，无需本地启动服务端。
 
-## 快速开始
+## 前置要求
 
-### 前置要求
+- Python 3.9 及以上
+- [uv](https://github.com/astral-sh/uv)（用于依赖解析与运行）
 
-- Python 3.9+
-- uv（推荐）或 pip
-
-### 安装
+## 安装
 
 ```bash
 git clone <repository-url>
@@ -25,246 +23,103 @@ cd anp-agent-example
 uv sync
 ```
 
-### 运行示例
+`uv sync` 会根据 `pyproject.toml` 与 `uv.lock` 安装运行期与开发依赖。
 
-#### 步骤 1：启动远程智能体
+## 环境配置
 
-```bash
-PYTHONPATH=src uv run python src/remote_agent.py
-```
+1. 复制 `env.example` 到 `.env`：
+   ```bash
+   cp env.example .env
+   ```
 
-远程智能体将在 `http://localhost:8000` 启动
+2. 按需调整 `.env` 中的配置：
+   - `HOST`：服务监听地址（默认 `0.0.0.0`）
+   - `PORT`：服务端口（默认 `8000`）
+   - `AGENT_DESCRIPTION_JSON_DOMAIN`：用于生成 `ad.json` URL 的域名（本地调试设为 `localhost:8000`，线上部署改为公开域名如 `agent-connect.ai`）
 
-#### 步骤 2：运行客户端测试
+3. **仅在运行 `src/local_agent_use_llm.py` 时需要配置 OpenAI**：
+   - `OPENAI_API_KEY`：OpenAI API 密钥（必填）
+   - `OPENAI_BASE_URL`：API 端点（可选，支持兼容接口如 Moonshot）
+   - `DEFAULT_OPENAI_MODEL`：默认模型（可选）
 
-在另一个终端：
+## 本地运行
 
-```bash
-uv run python run_example.py
-```
+1. **启动远程智能体**
+   ```bash
+   PYTHONPATH=src uv run python src/remote_agent.py
+   ```
+   服务启动后会在 `http://localhost:8000` 提供 JSON-RPC 与文档端点。
 
-或直接运行客户端：
+2. **运行客户端脚本**
+   ```bash
+   uv run python run_example.py
+   PYTHONPATH=src uv run python src/local_agent.py
+   PYTHONPATH=src uv run python src/local_agent_use_llm.py
+   ```
+   第一条命令展示完整的抓取与工具调用流程；第二条验证脚本化客户端；第三条验证引入 LLM 的客户端。
 
-```bash
-PYTHONPATH=src uv run python src/local_agent.py
-```
+## 访问托管的远端智能体
 
-## 架构
-
-### 远程智能体（`src/remote_agent.py`）
-
-使用 **FastANP** 构建的完整 ANP 智能体：
-- **ad.json**：智能体描述文档
-- **echo 接口**（内联在 ad.json 中）：简单消息回显
-- **greet 接口**（链接引用）：带会话管理的个性化问候
-
-**关键端点：**
-- `/agents/test/ad.json` - 智能体描述
-- `/agents/test/jsonrpc` - JSON-RPC API
-- `/agents/test/api/greet.json` - Greet 接口定义
-- `/docs` - Swagger UI
-
-### 本地客户端（`src/local_agent.py`）
-
-基于 **ANPCrawler** 的客户端：
-- 通过 ad.json 发现远程智能体
-- 自动解析接口定义
-- 通过 JSON-RPC 调用远程方法
-- 管理认证和缓存
-
-**关键特性：**
-- 自动接口发现
-- 内置认证（DID-WBA）
-- 响应缓存
-- 会话管理
-
-## 接口类型演示
-
-远程智能体演示了在 ad.json 中包含接口的两种方式：
-
-### 1. 内联接口（echo）
-
-```python
-# 完整定义嵌入在 ad.json 中
-if echo in anp.interfaces:
-    interfaces.append(anp.interfaces[echo].content)
-```
-
-### 2. 链接引用（greet）
-
-```python
-# 链接到单独文件
-if greet in anp.interfaces:
-    interfaces.append(anp.interfaces[greet].link_summary)
-```
-
-访问单独文件：`/agents/test/api/greet.json`
-
-## 使用示例
-
-### 使用 ANPCrawler（Python）
-
-```python
-from local_agent import RemoteAgentClient
-
-async def main():
-    client = RemoteAgentClient("http://localhost:8000")
-    
-    # 发现智能体
-    await client.fetch_agent_description()
-    
-    # 列出可用工具
-    tools = await client.list_available_tools()
-    
-    # 测试 echo
-    result = await client.test_echo("你好！")
-    print(result['result']['response'])
-    
-    # 测试 greet
-    result = await client.test_greet("Alice")
-    print(result['result']['message'])
-
-asyncio.run(main())
-```
-
-### 使用 curl（直接 JSON-RPC）
-
-**测试 echo 方法：**
-```bash
-curl -X POST http://localhost:8000/agents/test/jsonrpc \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "echo",
-    "params": {"params": {"message": "Hello"}},
-    "id": 1
-  }'
-```
-
-**测试 greet 方法：**
-```bash
-curl -X POST http://localhost:8000/agents/test/jsonrpc \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "greet",
-    "params": {"params": {"name": "Alice"}},
-    "id": 1
-  }'
-```
-
-**获取智能体描述：**
-```bash
-curl http://localhost:8000/agents/test/ad.json
-```
-
-**获取 greet 接口定义：**
-```bash
-curl http://localhost:8000/agents/test/api/greet.json
-```
+- **智能体描述**：`https://agent-connect.ai/agents/test/ad.json`
+- **示例请求**
+  ```bash
+  curl https://agent-connect.ai/agents/test/ad.json
+  ```
+- **JSON-RPC 调用**
+  ```bash
+  curl -X POST https://agent-connect.ai/agents/test/jsonrpc \
+    -H "Content-Type: application/json" \
+    -d '{
+      "jsonrpc": "2.0",
+      "method": "greet",
+      "params": {"params": {"name": "Alice"}},
+      "id": 1
+    }'
+  ```
+  将 `greet` 替换为 `echo` 即可测试内联 echo 接口。若端点需要认证，请使用下文提到的 DID 凭证。
 
 ## 项目结构
 
 ```
 anp-agent-example/
 ├── src/
-│   ├── remote_agent.py    # ANP 智能体（FastANP）
-│   ├── local_agent.py     # 客户端（ANPCrawler）
-│   └── config.py          # 配置
-├── examples/
-│   └── simple_agent_test.py
-├── run_example.py         # 主测试脚本
-└── README.md
+│   ├── config.py              # 运行时配置默认值与环境变量绑定
+│   ├── remote_agent.py        # FastANP 远程智能体，提供 echo/greet 接口
+│   ├── local_agent.py         # 基于 ANPCrawler 的脚本化客户端
+│   └── local_agent_use_llm.py # 演示引入大模型辅助的客户端流程
+├── docs/
+│   ├── did_public/            # DID 文档与密钥示例，供认证使用
+│   └── jwt_key/               # JWT 签名资产，用于本地测试
+├── examples/                  # 轻量级可运行示例
+├── run_example.py             # 本地演示的高层封装
+├── README.md
+└── README.cn.md
 ```
 
-## 主要特性
+## 文档与 DID 资源
 
-### 远程智能体（FastANP）
+- `docs/did_public/public-did-doc.json` 是客户端与远程智能体引用的 DID 文档。生产环境可前往 [didhost.cc](https://didhost.cc) 申请正式 DID，并替换示例文件。
+- `docs/jwt_key/` 内提供示例 RSA 密钥，用于 JSON Web Token 签名。部署前请更换为安全的密钥或改为读取外部机密。
+- `src/` 中的内联注释与接口描述提供扩展指引，新增路由或更新 `ad.json` 字段时请优先查阅 `remote_agent.py`。
 
-1. **简单的接口定义**：使用装饰器定义接口
-2. **两种接口类型**：
-   - 内联（echo）- 完整定义在 ad.json 中
-   - 链接引用（greet）- 单独文件
-3. **会话管理**：内置会话上下文
-4. **自动生成 OpenRPC**：接口定义自动生成
+## 开发流程
 
-### 本地客户端（ANPCrawler）
+- **运行测试**
+  ```bash
+  uv run pytest
+  ```
+- **代码检查与格式化**
+  ```bash
+  uv run ruff check src tests
+  uv run ruff format
+  ```
+- **配置覆盖**：复制 `env.example` 为 `.env`，可在不改动代码的前提下覆写端口、域名、密钥路径等环境变量。
 
-1. **自动发现**：爬取并解析智能体描述
-2. **接口解析**：提取并验证接口定义
-3. **认证**：内置 DID-WBA 认证
-4. **缓存**：响应缓存提高效率
-5. **会话跟踪**：跟踪访问的 URL 和统计信息
+## 故障排查
 
-### 会话管理示例
-
-greet 方法展示了会话上下文的使用：
-
-```python
-@anp.interface("/agents/test/api/greet.json", description="...")
-def greet(params: GreetParams, ctx: Context) -> dict:
-    # 访问会话
-    session_id = ctx.session.id
-    visit_count = ctx.session.get("visit_count", 0)
-    visit_count += 1
-    ctx.session.set("visit_count", visit_count)
-    
-    return {
-        "message": f"你好, {params.name}!",
-        "session_id": session_id,
-        "visit_count": visit_count
-    }
-```
-
-## 配置
-
-编辑 `src/config.py` 或创建 `.env` 文件：
-
-```bash
-cp env.example .env
-```
-
-关键设置：
-- `PORT`：远程智能体端口（默认：8000）
-- `AGENT_DESCRIPTION_JSON_DOMAIN`：智能体域名
-- `JWT_PRIVATE_KEY_PATH`：JWT 私钥路径
-- `JWT_PUBLIC_KEY_PATH`：JWT 公钥路径
-
-## 开发
-
-### 运行测试
-
-```bash
-uv run pytest
-```
-
-### 代码风格
-
-```bash
-uv run ruff check src
-```
-
-## API 文档
-
-查看交互式 API 文档：
-- **Swagger UI**：http://localhost:8000/docs
-- **ReDoc**：http://localhost:8000/redoc
-
-## 故障排除
-
-### 端口已被占用
-
-修改 `src/config.py` 中的 `PORT`
-
-### 连接被拒绝
-
-确保在启动客户端之前远程智能体已经运行
-
-### 认证错误
-
-客户端需要有效的 DID 文档和私钥文件：
-- `docs/did_public/public-did-doc.json`
-- `docs/jwt_key/RS256-private.pem`
+- **端口冲突**：在 `src/config.py`（或环境变量）中调整 `PORT`。
+- **认证失败**：确认 `docs/` 下的 DID 与密钥文件与 `src/config.py` 保持一致。
+- **连接问题**：检查本地服务是否运行，或直接改用托管地址进行验证。
 
 ## 许可证
 
