@@ -8,7 +8,7 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.23.0",
     "pydantic>=2.0.0",
-    "httpx>=0.24.0",
+    "httpx[socks]>=0.24.0",
     "python-multipart>=0.0.6",
     "pyyaml>=6.0",
     "anp==0.4.0",

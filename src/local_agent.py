@@ -45,7 +45,7 @@ class RemoteAgentClient:
 
         # Paths to DID document and private key
         self.did_document_path = str(project_root / "docs" / "did_public" / "public-did-doc.json")
-        self.private_key_path = str(project_root / "docs" / "jwt_key" / "RS256-private.pem")
+        self.private_key_path = str(project_root / "docs" / "did_public" / "public-private-key.pem")
 
         # Initialize ANPCrawler
         self.crawler = ANPCrawler(

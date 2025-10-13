@@ -10,8 +10,6 @@ This example demonstrates a complete FastANP remote agent with:
 - Custom ad.json route
 """
 
-from __future__ import annotations
-
 import logging
 import time
 from datetime import datetime, timezone
@@ -28,7 +26,7 @@ from config import load_public_did
 _project_root = Path(__file__).parent.parent
 
 HOST = "0.0.0.0"
-PORT = "8000"
+PORT = 8000
 AGENT_DESCRIPTION_JSON_DOMAIN=f"{HOST}:{PORT}"
 LOG_LEVEL = "INFO"
 
@@ -94,16 +92,12 @@ anp = FastANP(
     jsonrpc_server_url="/agents/remote/jsonrpc",
     jsonrpc_server_name="Remote Agent JSON-RPC API",
     jsonrpc_server_description="Remote Agent JSON-RPC API for ANP protocol",
-    enable_auth_middleware=False,  # Disable auth for demo
+    enable_auth_middleware=True,  # Disable auth for demo
     auth_config=auth_config
 )
 
 # Start time for uptime calculation
 _start_time = time.time()
-
-# Optional: Add authentication middleware
-if anp.auth_middleware:
-    app.add_middleware(anp.auth_middleware)
 
 
 # Define data models
@@ -138,7 +132,7 @@ def get_agent_description():
     # 3. Add Interface items using FastANP helpers
     ad["interfaces"] = [
         anp.interfaces[echo].content,
-        anp.interfaces[greet].link_summary,
+        anp.interfaces[greet].content,
     ]
 
     return ad

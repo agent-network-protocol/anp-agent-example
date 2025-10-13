@@ -9,7 +9,6 @@ and streams model-driven tool invocations until a final answer is produced.
 
 from __future__ import annotations
 
-import argparse
 import asyncio
 import json
 import logging
@@ -27,6 +26,8 @@ if str(project_root) not in sys.path:
 # Import after adjusting sys.path
 from anp.anp_crawler.anp_crawler import ANPCrawler  # noqa: E402
 
+from config import settings as openai_settings  # noqa: E402
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,14 +37,14 @@ class LLMLocalAgent:
     def __init__(
         self,
         agent_url: str,
-        model: str,
+        model: str | None,
         temperature: float,
         did_document_path: Path | None = None,
         private_key_path: Path | None = None,
     ) -> None:
         self.agent_url = agent_url.rstrip("/")
         self.agent_description_url = f"{self.agent_url}/agents/remote/ad.json"
-        self.model = model
+        self.model = model or openai_settings.default_model or "gpt-4.1-mini"
         self.temperature = temperature
 
         did_path = (
@@ -54,7 +55,7 @@ class LLMLocalAgent:
         key_path = (
             private_key_path
             if private_key_path
-            else project_root / "docs" / "jwt_key" / "RS256-private.pem"
+            else project_root / "docs" / "did_public" / "public-private-key.pem"
         )
 
         self.crawler = ANPCrawler(
@@ -62,7 +63,15 @@ class LLMLocalAgent:
             private_key_path=str(key_path),
             cache_enabled=True,
         )
-        self.client = OpenAI()
+        if not openai_settings.api_key:
+            raise RuntimeError(
+                "OPENAI_API_KEY is not configured. Set it in the .env file or environment variables before running the LLM agent."
+            )
+
+        client_kwargs: dict[str, Any] = {"api_key": openai_settings.api_key}
+        if openai_settings.base_url:
+            client_kwargs["base_url"] = openai_settings.base_url
+        self.client = OpenAI(**client_kwargs)
         self.tools = self._build_tool_definitions()
         self.system_prompt = self._build_system_prompt()
 
@@ -249,50 +258,22 @@ class LLMLocalAgent:
         return {"result": result}
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse CLI arguments for the local LLM agent."""
-    parser = argparse.ArgumentParser(description="Run an LLM-driven local ANP agent.")
-    parser.add_argument(
-        "prompt",
-        nargs="+",
-        help="High-level instruction for the agent.",
-    )
-    parser.add_argument(
-        "--agent-url",
-        default="http://localhost:8000",
-        help="Base URL of the remote ANP agent.",
-    )
-    parser.add_argument(
-        "--model",
-        default="gpt-4.1-mini",
-        help="OpenAI model identifier to use.",
-    )
-    parser.add_argument(
-        "--temperature",
-        type=float,
-        default=0.0,
-        help="Sampling temperature for the LLM.",
-    )
-    parser.add_argument(
-        "--log-level",
-        default="INFO",
-        help="Logging verbosity (DEBUG, INFO, WARNING, ERROR).",
-    )
-    return parser.parse_args()
-
-
-async def async_main(args: argparse.Namespace) -> None:
+async def async_main() -> None:
     """Entry point for the asynchronous workflow."""
     logging.basicConfig(
-        level=getattr(logging, args.log_level.upper(), logging.INFO),
+        level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    prompt = " ".join(args.prompt)
+    prompt = "帮我调用echo"
+    agent_url = "http://localhost:8000"
+    model_name = openai_settings.default_model or "gpt-4o-mini"
+    temperature = 0.0
+
     agent = LLMLocalAgent(
-        agent_url=args.agent_url,
-        model=args.model,
-        temperature=args.temperature,
+        agent_url=agent_url,
+        model=model_name,
+        temperature=temperature,
     )
 
     final_response = await agent.run(prompt)
@@ -301,9 +282,8 @@ async def async_main(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """CLI entry point."""
-    args = parse_args()
     try:
-        asyncio.run(async_main(args))
+        asyncio.run(async_main())
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
 
