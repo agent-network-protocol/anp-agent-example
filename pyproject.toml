@@ -2,7 +2,7 @@
 name = "anp-agent-example"
 version = "1.0.0"
 description = "ANP Agent Example - Demonstrating ANP-compliant agent implementation"
-readme = "sepc.md"
+readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "fastapi>=0.100.0",
@@ -11,8 +11,9 @@ dependencies = [
     "httpx>=0.24.0",
     "python-multipart>=0.0.6",
     "pyyaml>=6.0",
-    "agent-connect==0.3.7",
+    "anp==0.4.0",
     "python-dotenv>=1.0.0",
+    "openai>=2.3.0",
 ]
 
 [project.optional-dependencies]
