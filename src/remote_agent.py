@@ -90,7 +90,7 @@ anp = FastANP(
     jsonrpc_server_path="/agents/test/jsonrpc",
     jsonrpc_server_name="Remote Agent JSON-RPC API",
     jsonrpc_server_description="Remote Agent JSON-RPC API for ANP protocol",
-    enable_auth_middleware=False,  # Disable auth for demo
+    enable_auth_middleware=True,  # Disable auth for demo
     auth_config=auth_config
 )
 
