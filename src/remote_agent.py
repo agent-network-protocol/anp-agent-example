@@ -79,7 +79,8 @@ anp = FastANP(
     app=app,
     name="Remote Test Agent",
     description="Remote ANP agent for testing agent-to-agent communication",
-    base_url=server_settings.get_agent_url(""),
+    agent_domain=server_settings.agent_description_json_domain,
+    agent_description_path="/agents/test/ad.json",
     did=load_public_did(PUBLIC_DID_DOCUMENT_PATH),
     owner={
         "type": "Organization",
@@ -89,7 +90,7 @@ anp = FastANP(
     jsonrpc_server_path="/agents/test/jsonrpc",
     jsonrpc_server_name="Remote Agent JSON-RPC API",
     jsonrpc_server_description="Remote Agent JSON-RPC API for ANP protocol",
-    enable_auth_middleware=True,  # Disable auth for demo
+    enable_auth_middleware=False,  # Disable auth for demo
     auth_config=auth_config
 )
 
@@ -136,8 +137,7 @@ def get_agent_description():
 
 
 # Register interface methods
-
-@anp.interface("/agents/test/api/echo.json", description="Echo a provided message")
+@anp.interface("/agents/test/api/echo.json",)
 def echo(params: EchoParams) -> dict:
     """
     Echo a provided message.
@@ -155,7 +155,8 @@ def echo(params: EchoParams) -> dict:
     }
 
 
-@anp.interface("/agents/test/api/greet.json", description="Generate personalized greeting")
+# @anp.interface("/agents/test/api/greet.json", description="Generate personalized greeting")
+@anp.interface("/agents/test/api/greet.json")
 def greet(params: GreetParams, ctx: Context) -> dict:
     """
     Generate personalized greeting with session context.

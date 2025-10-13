@@ -276,6 +276,7 @@ async def main():
     logger.info("")
 
     client = RemoteAgentClient(
+        # agent_description_url="https://agent-connect.ai/agents/test/ad.json")  # Uses centralized configuration
         agent_description_url=f"http://{server_settings.host}:{server_settings.port}/agents/test/ad.json")  # Uses centralized configuration
 
     try:

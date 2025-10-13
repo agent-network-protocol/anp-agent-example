@@ -13,7 +13,7 @@ dependencies = [
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
     "openai>=2.3.0",
-    "anp==0.4.2",
+    "anp==0.4.3",
 ]
 
 [project.optional-dependencies]
