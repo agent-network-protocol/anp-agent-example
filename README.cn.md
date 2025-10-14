@@ -46,17 +46,16 @@ uv sync
 
 1. **启动远程智能体**
    ```bash
-   PYTHONPATH=src uv run python src/remote_agent.py
+  uv run python src/remote_agent.py
    ```
    服务启动后会在 `http://localhost:8000` 提供 JSON-RPC 与文档端点。
 
 2. **运行客户端脚本**
    ```bash
-   uv run python run_example.py
-   PYTHONPATH=src uv run python src/local_agent.py
-   PYTHONPATH=src uv run python src/local_agent_use_llm.py
+   uv run python src/local_agent.py
+   uv run python src/local_agent_use_llm.py
    ```
-   第一条命令展示完整的抓取与工具调用流程；第二条验证脚本化客户端；第三条验证引入 LLM 的客户端。
+   第一条验证脚本化客户端；第二条验证引入 LLM 的客户端。
 
 ## 访问托管的远端智能体
 
