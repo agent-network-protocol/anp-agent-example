@@ -52,7 +52,7 @@ uv sync
 
 2. **Exercise the clients**
    ```bash
-   uv run python run_example.py
+
    PYTHONPATH=src uv run python src/local_agent.py
    PYTHONPATH=src uv run python src/local_agent_use_llm.py
    ```
