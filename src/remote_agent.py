@@ -80,7 +80,6 @@ anp = FastANP(
     name="Remote Test Agent",
     description="Remote ANP agent for testing agent-to-agent communication",
     agent_domain=server_settings.agent_description_json_domain,
-    agent_description_path="/agents/test/ad.json",
     did=load_public_did(PUBLIC_DID_DOCUMENT_PATH),
     owner={
         "type": "Organization",
@@ -116,7 +115,7 @@ def get_agent_description():
     Get Agent Description for the remote agent.
     """
     # 1. Get common header from FastANP
-    ad = anp.get_common_header()
+    ad = anp.get_common_header(agent_description_path="/agents/test/ad.json")
 
     # 2. Add Information items (user-defined)
     ad["information"] = [
