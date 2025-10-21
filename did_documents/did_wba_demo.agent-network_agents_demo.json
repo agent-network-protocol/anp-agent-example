@@ -1,0 +1,32 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1",
+    "https://w3id.org/security/suites/secp256k1-2019/v1"
+  ],
+  "id": "did:wba:demo.agent-network:agents:demo",
+  "verificationMethod": [
+    {
+      "id": "did:wba:demo.agent-network:agents:demo#key-1",
+      "type": "EcdsaSecp256k1VerificationKey2019",
+      "controller": "did:wba:demo.agent-network:agents:demo",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "crv": "secp256k1",
+        "x": "CGDo_RB5KSOLr7nox5Af4aj8B5q4GXfvQ5WEKaIO9a8",
+        "y": "rkuG6rdj9ZWvU-QBm8O0WO39ja_QTWFDBbcmU44F04w",
+        "kid": "vKsSkf0zGrY73WAVtD7kbSHXzKALBMV-K-xa02fRZI0"
+      }
+    }
+  ],
+  "authentication": [
+    "did:wba:demo.agent-network:agents:demo#key-1"
+  ],
+  "service": [
+    {
+      "id": "did:wba:demo.agent-network:agents:demo#ad",
+      "type": "AgentDescription",
+      "serviceEndpoint": "https://demo.agent-network/agents/demo"
+    }
+  ]
+}

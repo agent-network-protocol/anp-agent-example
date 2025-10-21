@@ -8,6 +8,7 @@ This repository shows how to build and exercise an ANP (Agent Network Protocol) 
 
 - **Remote agent**: A FastANP-powered server in `src/remote_agent.py` exposing echo and greeting interfaces.
 - **Local clients**: `src/local_agent.py` and `src/local_agent_use_llm.py` demonstrate how to discover, authenticate against, and invoke remote agents.
+- **DID Server**: `src/did_server.py` provides a complete DID-WBA document creation and resolution service with compliant DID-to-URL conversion.
 - **Hosted environment**: The latest remote agent build is deployed and reachable via `https://agent-connect.ai/agents/test/ad.json`, so you can test without running local infrastructure.
 
 ## Prerequisites
@@ -52,11 +53,19 @@ uv sync
 
 2. **Exercise the clients**
    ```bash
-
    PYTHONPATH=src uv run python src/local_agent.py
    PYTHONPATH=src uv run python src/local_agent_use_llm.py
    ```
    The first command performs an end-to-end crawl and tool execution flow; the second validates the scripted ANPCrawler client; the third verifies the LLM-assisted client.
+
+
+3. **Start the DID server**
+   ```bash
+   PYTHONPATH=src uv run python src/did_server.py
+   ```
+   The DID server starts on `http://localhost:8080`, providing DID-WBA document resolution services.
+
+  note: The did server is only used for demonstration and reference purposes, and does not depend on the remote agent or local client.
 
 ## Using the Hosted Agent
 
@@ -86,7 +95,8 @@ anp-agent-example/
 │   ├── config.py              # Runtime configuration defaults and environment bindings
 │   ├── remote_agent.py        # FastANP remote agent with echo and greet interfaces
 │   ├── local_agent.py         # ANPCrawler client for scripted interactions
-│   └── local_agent_use_llm.py # Example client incorporating LLM-assisted flows
+│   ├── local_agent_use_llm.py # Example client incorporating LLM-assisted flows
+│   └── did_server.py          # DID-WBA server providing DID document creation and resolution
 ├── docs/
 │   ├── did_public/            # DID document and key material used during authentication
 │   └── jwt_key/               # JWT signing assets for local testing
@@ -95,6 +105,50 @@ anp-agent-example/
 ├── README.md
 └── README.cn.md
 ```
+
+## DID Server
+
+`src/did_server.py` is a complete DID-WBA (Decentralized Identifier Web-Based Authentication) server implementation example that provides the following features:
+
+### Key Features
+
+- **DID Document Creation**: Uses the ANP library to create DID documents compliant with WBA specifications
+- **Key Management**: Automatically generates and stores public/private key pairs with secure key storage
+- **DID Resolution**: Provides HTTP GET endpoints for DID-to-URL conversion and resolution
+- **Standards Compliant**: Fully follows DID-WBA specifications with standard URL-to-DID conversion
+
+### Usage Examples
+
+```bash
+# Start the DID server
+PYTHONPATH=src uv run python src/did_server.py
+
+# Access DID document
+curl http://localhost:8080/user/alice/did.json
+
+# Health check
+curl http://localhost:8080/health
+```
+
+### URL to DID Conversion Rules
+
+According to DID-WBA specifications, URL paths are converted to corresponding DID identifiers:
+
+- URL: `http://example.com/user/alice/did.json`
+- DID: `did:wba:example.com:user:alice`
+
+### Production Deployment
+
+**Important Note**: `src/did_server.py` is provided as an example implementation for learning and reference purposes. For production environments, we recommend:
+
+1. **Develop Your Own**: Use this example code as a reference to develop your own DID server
+2. **Use Hosted Service**: If you prefer not to develop your own, you can use our hosted DID service: [https://didhost.cc/](https://didhost.cc/)
+
+The hosted service provides:
+- High availability and stability
+- Automatic backup and recovery
+- Professional security guarantees
+- 24/7 technical support
 
 ## Documentation and DID Assets
 

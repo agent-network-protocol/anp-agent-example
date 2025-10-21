@@ -1,0 +1,32 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1",
+    "https://w3id.org/security/suites/secp256k1-2019/v1"
+  ],
+  "id": "did:wba:example.com:user:alice",
+  "verificationMethod": [
+    {
+      "id": "did:wba:example.com:user:alice#key-1",
+      "type": "EcdsaSecp256k1VerificationKey2019",
+      "controller": "did:wba:example.com:user:alice",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "crv": "secp256k1",
+        "x": "BZyAsOyhuKIchHEKtf31F_n36VjklMhGgZ-6qxI20CI",
+        "y": "OsV0mmwlbOUBHnfdY8DaSKBRFggv9yIcp-qHN3W-FDI",
+        "kid": "miJW4CSeQibggoPB9_kt4Xwtszxrxem_xiHMUcCDJiQ"
+      }
+    }
+  ],
+  "authentication": [
+    "did:wba:example.com:user:alice#key-1"
+  ],
+  "service": [
+    {
+      "id": "did:wba:example.com:user:alice#ad",
+      "type": "AgentDescription",
+      "serviceEndpoint": "https://example.com/user/alice"
+    }
+  ]
+}

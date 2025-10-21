@@ -8,6 +8,7 @@
 
 - **远程智能体**：`src/remote_agent.py` 使用 FastANP 暴露 echo 与 greet 接口。
 - **本地客户端**：`src/local_agent.py`、`src/local_agent_use_llm.py` 演示如何发现、认证并调用远程智能体。
+- **DID 服务器**：`src/did_server.py` 提供完整的 DID-WBA 文档创建和解析服务，支持符合规范的 DID 到 URL 转换（DID服务器仅用作代码参考）。
 - **托管环境**：最新版本的远程智能体已部署，可通过 `https://agent-connect.ai/agents/test/ad.json` 直接测试，无需本地启动服务端。
 
 ## 前置要求
@@ -46,16 +47,27 @@ uv sync
 
 1. **启动远程智能体**
    ```bash
-  uv run python src/remote_agent.py
+   PYTHONPATH=src uv run python src/remote_agent.py
    ```
    服务启动后会在 `http://localhost:8000` 提供 JSON-RPC 与文档端点。
 
 2. **运行客户端脚本**
    ```bash
-   uv run python src/local_agent.py
-   uv run python src/local_agent_use_llm.py
+   PYTHONPATH=src uv run python src/local_agent.py
+   PYTHONPATH=src uv run python src/local_agent_use_llm.py
    ```
    第一条验证脚本化客户端；第二条验证引入 LLM 的客户端。
+
+  
+3. **启动 DID 服务器**
+
+   ```bash
+   PYTHONPATH=src uv run python src/did_server.py
+   ```
+   DID 服务器会在 `http://localhost:8080` 启动，提供 DID-WBA 文档解析服务。
+
+   备注：remote_agent.py和local_agent.py运行的过程中，并不依赖did 服务器，did服务器代码近用作演示、参考作用
+
 
 ## 访问托管的远端智能体
 
@@ -85,7 +97,8 @@ anp-agent-example/
 │   ├── config.py              # 运行时配置默认值与环境变量绑定
 │   ├── remote_agent.py        # FastANP 远程智能体，提供 echo/greet 接口
 │   ├── local_agent.py         # 基于 ANPCrawler 的脚本化客户端
-│   └── local_agent_use_llm.py # 演示引入大模型辅助的客户端流程
+│   ├── local_agent_use_llm.py # 演示引入大模型辅助的客户端流程
+│   └── did_server.py          # DID-WBA 服务器，提供 DID 文档创建和解析
 ├── docs/
 │   ├── did_public/            # DID 文档与密钥示例，供认证使用
 │   └── jwt_key/               # JWT 签名资产，用于本地测试
@@ -94,6 +107,50 @@ anp-agent-example/
 ├── README.md
 └── README.cn.md
 ```
+
+## DID 服务器说明
+
+`src/did_server.py` 是一个完整的 DID-WBA（Decentralized Identifier Web-Based Authentication）服务器实现示例，提供以下功能：
+
+### 主要特性
+
+- **DID 文档创建**：使用 ANP 库创建符合 WBA 规范的 DID 文档
+- **密钥管理**：自动生成和存储公钥/私钥对，支持安全的密钥存储
+- **DID 解析**：提供 HTTP GET 端点进行 DID 到 URL 的转换和解析
+- **符合规范**：完全遵循 DID-WBA 规范，支持标准的 URL 到 DID 转换
+
+### 使用示例
+
+```bash
+# 启动 DID 服务器
+PYTHONPATH=src uv run python src/did_server.py
+
+# 访问 DID 文档
+curl http://localhost:8080/user/alice/did.json
+
+# 健康检查
+curl http://localhost:8080/health
+```
+
+### URL 到 DID 转换规则
+
+根据 DID-WBA 规范，URL 路径会转换为对应的 DID 标识符：
+
+- URL: `http://example.com/user/alice/did.json`
+- DID: `did:wba:example.com:user:alice`
+
+### 生产环境部署
+
+**重要提示**：`src/did_server.py` 仅作为示例实现，用于学习和参考。在生产环境中，建议：
+
+1. **自行开发**：参考此示例代码开发自己的 DID 服务器
+2. **使用托管服务**：如果不想自行开发，可以使用我们的托管 DID 服务：[https://didhost.cc/](https://didhost.cc/)
+
+托管服务提供：
+- 高可用性和稳定性
+- 自动备份和恢复
+- 专业的安全保障
+- 24/7 技术支持
 
 ## 文档与 DID 资源
 

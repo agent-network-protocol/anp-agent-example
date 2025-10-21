@@ -10,6 +10,5 @@ __author__ = "ANP Agent Example Team"
 
 # Export main components for easy access
 from .config import settings
-from .main import app
 
-__all__ = ["app", "settings"]
+__all__ = ["settings"]
