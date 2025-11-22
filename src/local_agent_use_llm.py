@@ -85,9 +85,12 @@ class LLMLocalAgent:
         return (
             f"You are an orchestration agent controlling ANPCrawler to interact with a remote ANP "
             f"service located at {self.agent_description_url}. Always begin by calling the fetch_text tool on the "
-            f"agent description URL {self.agent_description_url} to discover available interfaces. When invoking "
-            f"execute_tool_call, wrap remote parameters inside the 'params' key if required by the "
-            f"target interface. Respond with concise JSON-formattable conclusions once you have the "
+            f"agent description URL {self.agent_description_url} to discover available interfaces. "
+            f"CRITICAL: When invoking execute_tool_call, you MUST wrap ALL parameters inside a 'params' key. "
+            f"For example, to call echo with message 'Hello', use: "
+            f'{{"tool_name": "echo", "arguments": {{"params": {{"message": "Hello"}}}}}}. '
+            f"The 'arguments' field must always be an object containing a 'params' key. "
+            f"Respond with concise JSON-formattable conclusions once you have the "
             f"necessary information. Avoid guessing and rely on the provided tools."
         )
 
@@ -123,9 +126,12 @@ class LLMLocalAgent:
                 "function": {
                     "name": "execute_tool_call",
                     "description": (
-                        "Execute a remote interface discovered via ANPCrawler. Ensure you pass "
-                        "arguments that match the interface schema, typically nested under "
-                        "'params'."
+                        "Execute a remote interface discovered via ANPCrawler. "
+                        "IMPORTANT: All parameters MUST be wrapped in a 'params' key. "
+                        "For example, to call 'echo' with message 'Hello', use: "
+                        '{"tool_name": "echo", "arguments": {"params": {"message": "Hello"}}}. '
+                        "The 'arguments' field must always contain a 'params' object that matches "
+                        "the interface's parameter schema."
                     ),
                     "parameters": {
                         "type": "object",
